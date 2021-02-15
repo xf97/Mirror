@@ -1,2 +1,2 @@
-# TianYan
-TianYan(天演) is a system that simulates stock automatic trading.
+# Mirror
+Mirror(镜像) is a system that simulates stock automatic trading.
