@@ -11,8 +11,11 @@ import os
 import logging
 import rich	#定制化输出
 import random
-#账户数据结构，股票数据结构，每日交易信息保存数据结构
+#账户数据结构，股票数据结构，每日交易信息保存数据结构，年报数据结构
 from account import accountClass as ac
+from share import shareClass as sc
+from transaction import transactionClass as tc
+from annualReport import annualReportClass as arc
 
 #常量部分
 LAST_YEARS = 20	# 持续调查20年
@@ -21,6 +24,7 @@ SHARES_NUM = 50	#参与的股票数量
 DAYS_IN_1_YEAR = 360	#一年按360天计算，便于生成每月记录
 DAYS_IN_1_MONTH = 30 	#每月的天数
 SALE_PROBABILITY = 0.5	#想出售的概率
+#需要读取的数据文件们, 例如股票的信息, 年报的信息
 
 class mirror:
 	def __init__(self):
