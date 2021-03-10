@@ -2,7 +2,7 @@
 
 '''
 这是Mirror镜像系统主控文件
-用于调动各个程序驱动程序
+用于调动各个组件用以驱动程序
 python version: 3.7
 '''
 
@@ -12,6 +12,7 @@ import logging
 import rich	#定制化输出
 import random
 #账户数据结构，股票数据结构，每日交易信息保存数据结构
+from account import accountClass as ac
 
 #常量部分
 LAST_YEARS = 20	# 持续调查20年
@@ -24,7 +25,7 @@ SALE_PROBABILITY = 0.5	#想出售的概率
 class mirror:
 	def __init__(self):
 		#首先要初始化账户和股票
-		self.accountsList = self.initAccounts(USERS_NUM)
+		self.accountsList = self.initAccounts(USERS_NUM, SHARES_NUM)
 		#然后要初始化每只股票的年报信息以及股票
 		#一次性获取每只股票20年的信息了，后面从里面查就好了
 		self.annualReportDict = self.initAnnualReports(SHARES_NUM)
@@ -37,7 +38,7 @@ class mirror:
 		#初始化每只股票，包括价格、价格上下限、总股数、想买的概率(20年的，以数组形式)、当日是否允许再交易(涨跌停)
 		pass
 
-	def initAccounts(self, _accountsNum):
+	def initAccounts(self, _accountsNum, _sharesNum):
 		#初始化每个账户，包括现有资金、50只股票的持有情况、利息账户
 		pass
 
