@@ -8,3 +8,6 @@
 SELL_PROB = 0.5	#卖出概率
 UPPER_LIMIT = 1.1 #涨停
 LOWER_LIMIT = 0.9 #跌停
+DATA_PATH = "..\\data\\dataForExp.xlsx"
+INIT_PRICE = "initPrice"	#初始价格表名
+PURCHASE_PROB = "purchaseProb"	#购买概率表名

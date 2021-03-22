@@ -1,3 +1,2 @@
 rich
-xlrd
-xlwt
+openpyxl

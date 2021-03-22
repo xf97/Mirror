@@ -11,11 +11,16 @@ import os
 import logging
 import rich	#定制化输出
 import random
-#账户数据结构，股票数据结构，每日交易信息保存数据结构，年报数据结构
+import openpyxl	#操作ecxel文件
+#账户数据结构，股票数据结构，每日交易信息保存数据结构，年报数据结构，常量
 from account import accountClass as ac
 from share import shareClass as sc
 from transaction import transactionClass as tc
 from annualReport import annualReportClass as arc
+from constant import *
+#excel读写类
+from excel2Dict import ExcelToDict
+
 
 #常量部分
 LAST_YEARS = 20	# 持续调查20年
@@ -29,19 +34,53 @@ SALE_PROBABILITY = 0.5	#想出售的概率
 class mirror:
 	def __init__(self):
 		#首先要初始化账户和股票
-		self.accountsList = self.initAccounts(USERS_NUM, SHARES_NUM)
+		#self.accountsList = self.initAccounts(USERS_NUM, SHARES_NUM)
 		#然后要初始化每只股票的年报信息以及股票
 		#一次性获取每只股票20年的信息了，后面从里面查就好了
-		self.annualReportDict = self.initAnnualReports(SHARES_NUM)
-		self.sharesList = self.initShares(SHARES_NUM, self.annualReportDict)
+		#self.annualReportDict = self.initAnnualReports(SHARES_NUM)
+		self.sharesList = self.initShares(SHARES_NUM)
 		#初始化日志记录
 		#todo
-		pass
 
 	def initShares(self, _sharesNum):
 		#初始化每只股票，包括价格、价格上下限、总股数、想买的概率(20年的，以数组形式)、当日是否允许再交易(涨跌停)
 		#价格，id，总数和股票数量
-		
+		shareInfo = ExcelToDict(DATA_PATH)
+		shareInfo.open_object()
+		shareInfo.read_excel()
+		#初始价格表
+		initPriceSheet = shareInfo.data_dict[INIT_PRICE]
+		purchaseProbSheet = shareInfo.data_dict[PURCHASE_PROB]
+		#股票信息字典，键-id，值-列表，依次是初始价格、股票总数、想买概率列表
+		shareInfoDict = dict()
+		for value in initPriceSheet["value_row"].values():
+			shareId = value["股票代码"]
+			sharePrice = value["初始价格"]
+			shareInfoDict[shareId] = list()
+			shareInfoDict[shareId].append(sharePrice)
+		#记录股票总数
+		for value in shareInfoDict.values():
+			value.append(100)
+		#初始化交易概率
+		for valueDict in purchaseProbSheet["value_row"].values():
+			shareId = list(valueDict.values())[0]
+			sharePurcProbList = list(valueDict.values())[1:]
+			shareInfoDict[int(shareId)].append(sharePurcProbList)
+		#现在初始化股票
+		sharesList = list()
+		for key, value in shareInfoDict.items():
+			shareId = key
+			sharePrice = value[0]
+			shareNumber = value[1]
+			sharePurcProbList = value[2]
+			sharesList.append(sc(sharePrice, shareNumber, sharePurcProbList, shareId))
+		'''
+		for obj in sharesList:
+			print(obj)
+		'''
+		return sharesList
+
+
 
 
 	def initAccounts(self, _accountsNum, _sharesNum):
@@ -114,3 +153,4 @@ class mirror:
 
 #单元测试
 if __name__ == "__main__":
+	aMirroe = mirror()

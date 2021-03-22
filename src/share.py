@@ -25,6 +25,18 @@ class shareClass:
 		self.stopFlag = False	#可否交易标志
 		self.shareId = _id	#股票ID
 
+	#打印对象使用
+	def __str__(self):
+		msg = "股票ID " + str(self.shareId) + "\n"
+		msg += ("当天涨跌上下限 " + str(self.priceUpperLimit) + str(self.priceLowerLimit))
+		msg += ("当天出价上下限 " + str(self.bidHighLimit) + str(self.bidLowLimit))
+		msg += ("价格 " + str(self.price))
+		msg += ("股票数量 " + str(self.number))
+		msg += ("允许交易标志 " + str(self.stopFlag))
+		msg += ("想买概率 " + str(len(self.probList)))
+		msg += "\n"
+		return msg
+
 	def getUpperLimit(self):
 		return self.price * UPPER_LIMIT
 
