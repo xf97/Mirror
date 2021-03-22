@@ -7,7 +7,7 @@ python version: 3.7
 '''
 __author__ = "xiaofeng"
 
-import constant
+from constant import *
 import math
 
 class shareClass:
@@ -41,6 +41,8 @@ class shareClass:
 	def setPrice(self, _newPrice):
 		if _newPrice > self.bidHighLimit or _newPrice < self.bidLowLimit:
 			raise Exception("无效的价格 %d" % _newPrice)
+		elif self.getStopFlag() == True:
+			raise Exception("本日交易因涨跌停终止。")
 		else:
 			#否则是有效价格
 			#价格上升，更新上下限
@@ -88,7 +90,26 @@ class shareClass:
 	def getShareId(self):
 		return self.shareId
 
+	def dailyInit(self, _newPrice = 0.0):
+		#更新价格，更新出价范围，更新交易准许符
+		if not math.isclose(_newPrice, 0.0):
+			self.setPrice(_newPrice)
+		self.resetStopFlag()
+		self.setLowerAndUpperLimit()
+
 #单元测试
 if __name__ == "__main__":
 	probList = [1] * 20
 	aShare = shareClass(10, 10000, probList, 1)
+	print(aShare.getPrice())
+	print(aShare.getBidRange())
+	print(aShare.getShareId())
+	print(aShare.getStopFlag())
+	print(aShare.getPurchaseProb(19))
+	print(aShare.setPrice(11))
+	print(aShare.getPrice())
+	print(aShare.getBidRange())
+	print(aShare.getShareId())
+	print(aShare.getStopFlag())
+	print(aShare.dailyInit())
+	print(aShare.setPrice(10.5))

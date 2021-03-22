@@ -19,7 +19,7 @@ from annualReport import annualReportClass as arc
 
 #常量部分
 LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 50	#参与账户数量
+USERS_NUM = 500	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
 DAYS_IN_1_YEAR = 360	#一年按360天计算，便于生成每月记录
 DAYS_IN_1_MONTH = 30 	#每月的天数
@@ -40,7 +40,9 @@ class mirror:
 
 	def initShares(self, _sharesNum):
 		#初始化每只股票，包括价格、价格上下限、总股数、想买的概率(20年的，以数组形式)、当日是否允许再交易(涨跌停)
-		pass
+		#价格，id，总数和股票数量
+		
+
 
 	def initAccounts(self, _accountsNum, _sharesNum):
 		#初始化每个账户，包括现有资金、50只股票的持有情况、利息账户
@@ -55,6 +57,7 @@ class mirror:
 		#根据当前年份，更新股票的数据
 		pass
 
+	'''
 	def run(self):
 		#进行交易
 		nowYear = 1	#当前年份
@@ -107,3 +110,7 @@ class mirror:
 			#汇总当年的交易记录，可能需要存盘
 			nowYear += 1
 		print("Done")
+	'''
+
+#单元测试
+if __name__ == "__main__":
