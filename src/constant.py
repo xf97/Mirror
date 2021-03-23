@@ -11,3 +11,4 @@ LOWER_LIMIT = 0.9 #跌停
 DATA_PATH = "..\\data\\dataForExp.xlsx"
 INIT_PRICE = "initPrice"	#初始价格表名
 PURCHASE_PROB = "purchaseProb"	#购买概率表名
+SHARE_NUMBER = "initFund"	#初始股票数量

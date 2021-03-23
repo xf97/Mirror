@@ -34,11 +34,12 @@ SALE_PROBABILITY = 0.5	#想出售的概率
 class mirror:
 	def __init__(self):
 		#首先要初始化账户和股票
-		#self.accountsList = self.initAccounts(USERS_NUM, SHARES_NUM)
 		#然后要初始化每只股票的年报信息以及股票
 		#一次性获取每只股票20年的信息了，后面从里面查就好了
 		#self.annualReportDict = self.initAnnualReports(SHARES_NUM)
 		self.sharesList = self.initShares(SHARES_NUM)
+		self.initFund = 0	#每个人持有的初始资金
+		self.accountsList = self.initAccounts(USERS_NUM, self.initFund, self.sharesList)
 		#初始化日志记录
 		#todo
 
@@ -51,6 +52,7 @@ class mirror:
 		#初始价格表
 		initPriceSheet = shareInfo.data_dict[INIT_PRICE]
 		purchaseProbSheet = shareInfo.data_dict[PURCHASE_PROB]
+		shareNumberSheet = shareInfo.data_dict[SHARE_NUMBER]
 		#股票信息字典，键-id，值-列表，依次是初始价格、股票总数、想买概率列表
 		shareInfoDict = dict()
 		for value in initPriceSheet["value_row"].values():
@@ -59,8 +61,12 @@ class mirror:
 			shareInfoDict[shareId] = list()
 			shareInfoDict[shareId].append(sharePrice)
 		#记录股票总数
-		for value in shareInfoDict.values():
-			value.append(100)
+		for value in shareNumberSheet["value_row"].values():
+			shareId = int(value["股票代码"])
+			shareNum = int(value["初始股数"])
+			if self.initFund == 0:
+				self.initFund = int(value["初始资金"])
+			shareInfoDict[shareId].append(shareNum)
 		#初始化交易概率
 		for valueDict in purchaseProbSheet["value_row"].values():
 			shareId = list(valueDict.values())[0]
@@ -80,12 +86,12 @@ class mirror:
 		'''
 		return sharesList
 
-
-
-
-	def initAccounts(self, _accountsNum, _sharesNum):
+	def initAccounts(self, _accountsNum, _initFund, _sharesList):
 		#初始化每个账户，包括现有资金、50只股票的持有情况、利息账户
-		pass
+		accountsList = list()
+		#要每只股票的总股数
+		for i in range(_accountsNum):
+
 
 	def initAnnualReports(self, _sharesNum):
 		#初始化每只股票各自的20年的年报，使用这些信息计算股票的信息(第一年的基础价格,
