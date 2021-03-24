@@ -16,7 +16,8 @@ DEC_FLAG = "-"
 
 class accountClass:
 	#传入的
-	def __init__(self, _fund, _sharesInfoList):
+	def __init__(self, _accountId, _fund, _sharesInfoList):
+		self.accountId = _accountId
 		#所有数据的外部可见性先暂定为public
 		self.fund = _fund	#持有的资金, 尚不明确是整型还是double
 		self.stockHolding = [0] * len(_sharesInfoList)	#持有的股票, 列表第i位的数值表示该用户持有第i只股票的数量
@@ -25,6 +26,7 @@ class accountClass:
 
 	def __str__(self):
 		msg = str()
+		msg += ("当前账户编号： " + str(self.accountId) + "\n")
 		msg += ("当前资金： " + str(self.fund) + "\n")
 		msg += ("股票持有情况： \n")
 		for index, i in enumerate(self.stockHolding):
@@ -76,8 +78,8 @@ class accountClass:
 				continue
 			else:
 				nowMoney = totalMoney #* random.random()	#拿出一部分钱来买这只股票
-				if index == len(tempSharesInfoList) - 1:
-					#如果是最后一支股票，就用所有钱买
+				if index == self.getLastShareOnSale(tempSharesInfoList):
+					#如果是最后一支没卖完的股票，就用所有钱买
 					nowMoney = totalMoney
 				#计算当前这些钱能买多少股票
 				maxNum = (nowMoney // tempSharesInfoList[index][1])
@@ -86,7 +88,8 @@ class accountClass:
 				#那么扣钱
 				spendMoney = purchaseShareNum * tempSharesInfoList[index][1]
 				totalMoney -= spendMoney
-				self.fund -= spendMoney
+				self.setFund(spendMoney, DEC_FLAG)
+				#self.fund -= spendMoney
 				self.stockHolding[index] = purchaseShareNum
 				tempSharesInfoList[index][0] -= purchaseShareNum
 				index += 1
@@ -97,5 +100,21 @@ class accountClass:
 		#print(self.fund, self.stockHolding)
 		#print("*" * 20)
 		return tempSharesInfoList
+
+	#传入股票列表，返回最后一只在售股票的下标
+	def getLastShareOnSale(self, _shareInfoList):
+		#从后向前遍历
+		for index, share in enumerate(_shareInfoList[::-1]):
+			if share[0] != 0:
+				return len(_shareInfoList) - index - 1
+			else:
+				continue
+			return -1
+
+	#返回该用户持有第_index只股票吗
+	def doIOwnThisStock(self, _index):
+		return self.stockHolding[_index] != 0
+
+
 
 

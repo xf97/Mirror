@@ -26,8 +26,8 @@ from excel2Dict import ExcelToDict
 LAST_YEARS = 20	# 持续调查20年
 USERS_NUM = 500	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 360	#一年按360天计算，便于生成每月记录
-DAYS_IN_1_MONTH = 30 	#每月的天数
+DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -36,6 +36,7 @@ class mirror:
 		#首先要初始化账户和股票
 		#然后要初始化每只股票的年报信息以及股票
 		#一次性获取每只股票20年的信息了，后面从里面查就好了
+		#用不上
 		#self.annualReportDict = self.initAnnualReports(SHARES_NUM)
 		self.initFund = 0	#每个人持有的初始资金
 		self.sharesList = self.initShares(SHARES_NUM)
@@ -99,10 +100,10 @@ class mirror:
 		#每次初始化两个用户，前一个初始化资金不足的由第二个补上
 		for i in range(_accountsNum // 2):
 			account1Ratio = random.randint(0, 100)	#账户1用来购买股票的资金比例
-			account2Ratio = min(100, 101 - account1Ratio) 	#账户2用来购买股票的资金比例
+			account2Ratio = min(100, 100.1 - account1Ratio) 	#账户2用来购买股票的资金比例
 			#print(account1Ratio, account2Ratio, account1Ratio + account2Ratio)
-			account1 = ac(self.initFund, shareInfoList)	#账户1
-			account2 = ac(self.initFund, shareInfoList)	#账户2
+			account1 = ac(i + 1, self.initFund, shareInfoList)	#账户1
+			account2 = ac(i + 251, self.initFund, shareInfoList)	#账户2
 			#出资购买股票，返回值是新的shareInfoList
 			shareInfoList = account1.initHoldShares(account1Ratio, shareInfoList)
 			shareInfoList = account2.initHoldShares(account2Ratio, shareInfoList)
@@ -110,27 +111,65 @@ class mirror:
 			accountsList.append(account1)
 			accountsList.append(account2)
 		#print([i[0] for i in shareInfoList])
+		'''
 		for i in accountsList:
 			print(i)
+		'''
 		return accountsList
 
 
 	def initAnnualReports(self, _sharesNum):
+		#暂不需要
 		#初始化每只股票各自的20年的年报，使用这些信息计算股票的信息(第一年的基础价格,
 		#后续每年的想买概率)
 		pass
 
 	def updateShares(self, _annualReports, _nowYear):
+		#暂不需要
 		#根据当前年份，更新股票的数据
 		pass
 
-	'''
 	def run(self):
 		#进行交易
 		nowYear = 1	#当前年份
-		nowDay = 1
-		while nowYear <= LAST_YEARS:
+		nowDay = 1	#当前天数
+		nowMonth = 1	#当前月份
+		while nowYear <= 2:
 			#模拟二十年的
+			while nowDay <= DAYS_IN_1_YEAR:
+				#对于每一个账户
+				for userIndex in range(len(self.accountsList)):
+					#对于每位用户
+					for shareIndex in range(len(self.sharesList)):
+						#对于每只股票
+						#想买吗
+						if random.random() < self.sharesList[shareIndex].getPurchaseProb(nowYear - 1):
+							#想买
+							#去问其他账户
+							for anotherUserIndex in range(len(self.accountsList)):
+								if anotherUserIndex == userIndex:
+									#不跟自己做交易
+									continue
+								else:
+									#找到持有这只股票的账户
+									if self.accountsList[anotherUserIndex].doIOwnThisStock(shareIndex):
+										print("账户" + str(anotherUserIndex) + " 持有股票" + str(shareIndex))
+									else:
+										continue
+						else:
+							#不想买，去问其他股票
+							continue
+				if nowDay == DAYS_IN_1_MONTH[nowMonth - 1]:
+					#达到当月最后一天
+					#记录数据
+					nowMonth += 1
+				nowDay += 1
+				print(nowYear, nowMonth, nowDay)
+			#一年结束
+			nowYear += 1
+			nowDay = 1
+			nowMonth = 1
+			'''
 			if nowYear != 1:
 				#第一年的数据已经初始化
 				#初始化其他年的股票数据
@@ -176,9 +215,9 @@ class mirror:
 			#一年交易结束
 			#汇总当年的交易记录，可能需要存盘
 			nowYear += 1
-		print("Done")
-	'''
+		'''
 
 #单元测试
 if __name__ == "__main__":
-	aMirroe = mirror()
+	aMirror = mirror()
+	aMirror.run()
