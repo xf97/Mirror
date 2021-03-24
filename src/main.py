@@ -37,8 +37,8 @@ class mirror:
 		#然后要初始化每只股票的年报信息以及股票
 		#一次性获取每只股票20年的信息了，后面从里面查就好了
 		#self.annualReportDict = self.initAnnualReports(SHARES_NUM)
-		self.sharesList = self.initShares(SHARES_NUM)
 		self.initFund = 0	#每个人持有的初始资金
+		self.sharesList = self.initShares(SHARES_NUM)
 		self.accountsList = self.initAccounts(USERS_NUM, self.initFund, self.sharesList)
 		#初始化日志记录
 		#todo
@@ -89,8 +89,30 @@ class mirror:
 	def initAccounts(self, _accountsNum, _initFund, _sharesList):
 		#初始化每个账户，包括现有资金、50只股票的持有情况、利息账户
 		accountsList = list()
-		#要每只股票的总股数
-		for i in range(_accountsNum):
+		#要每只股票的总股数和价格
+		shareInfoList = [[0, 0]] * len(_sharesList)
+		for obj in _sharesList:
+			shareId = obj.getShareId()
+			shareNum = obj.getNumberOfShare()
+			sharePrice = obj.getPrice()
+			shareInfoList[shareId - 1] = [shareNum, sharePrice]
+		#每次初始化两个用户，前一个初始化资金不足的由第二个补上
+		for i in range(_accountsNum // 2):
+			account1Ratio = random.randint(0, 100)	#账户1用来购买股票的资金比例
+			account2Ratio = min(100, 101 - account1Ratio) 	#账户2用来购买股票的资金比例
+			#print(account1Ratio, account2Ratio, account1Ratio + account2Ratio)
+			account1 = ac(self.initFund, shareInfoList)	#账户1
+			account2 = ac(self.initFund, shareInfoList)	#账户2
+			#出资购买股票，返回值是新的shareInfoList
+			shareInfoList = account1.initHoldShares(account1Ratio, shareInfoList)
+			shareInfoList = account2.initHoldShares(account2Ratio, shareInfoList)
+			#把两个对象加入账户列表
+			accountsList.append(account1)
+			accountsList.append(account2)
+		#print([i[0] for i in shareInfoList])
+		for i in accountsList:
+			print(i)
+		return accountsList
 
 
 	def initAnnualReports(self, _sharesNum):

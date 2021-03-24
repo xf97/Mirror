@@ -12,3 +12,4 @@ DATA_PATH = "..\\data\\dataForExp.xlsx"
 INIT_PRICE = "initPrice"	#初始价格表名
 PURCHASE_PROB = "purchaseProb"	#购买概率表名
 SHARE_NUMBER = "initFund"	#初始股票数量
+MIN_BUY_QUA = 100	#最小买入数量
