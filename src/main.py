@@ -153,7 +153,14 @@ class mirror:
 								else:
 									#找到持有这只股票的账户
 									if self.accountsList[anotherUserIndex].doIOwnThisStock(shareIndex):
-										print("账户" + str(anotherUserIndex) + " 持有股票" + str(shareIndex))
+										#然后看这个账户想不想卖这只股票
+										if random.random() <= SELL_PROB:
+											#想卖
+											#那么进入买方卖方出价环节
+											pass
+										else:
+											#不想卖
+											pass
 									else:
 										continue
 						else:
