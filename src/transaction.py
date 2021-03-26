@@ -10,6 +10,7 @@ class transactionClass:
 	def __init__(self, _shareNum):
 		#因交易数据尚不明确, 此类暂不明确
 		#存储每只股当天和前一天的交易量
+		#print(_shareNum, type(_shareNum))
 		self.yesterdayTransactionList = [0] * _shareNum
 		self.todayTransactionList = [0] * _shareNum
 		self.shareNum = _shareNum

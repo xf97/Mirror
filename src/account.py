@@ -116,5 +116,32 @@ class accountClass:
 		return self.stockHolding[_index] != 0
 
 
+	def howManySharesICanBuy(self, _price):
+		#向下取整
+		num = self.fund / _price
+		return int(num)
+
+	#将持有的第n只股票增加或减少若干股
+	def setShare(self, _shareIndex, _num, _flag):
+		#flag为+则表示增加股票，为-表示减少股票
+		if _flag == INC_FLAG:
+			self.stockHolding[_shareIndex] += _num
+		elif _flag == DEC_FLAG and _num <= self.stockHolding[_shareIndex]:
+			self.stockHolding[_shareIndex] -= _num
+		else:
+			raise Exception("股票不允许卖空, 现有第%d只股票的数量%d, 欲卖出数量-%d" % (_shareIndex, self.stockHolding[_shareIndex], _num))		
+
+	def buyShares(self, _num, _price, _shareIndex):
+		#减钱，加股票
+		self.setFund(_num * _price, DEC_FLAG)	#减钱
+		self.setShare(_shareIndex, _num, INC_FLAG)	#加股票
+
+	def sellShares(self, _num, _price, _shareIndex):
+		self.setFund(_num * _price, INC_FLAG)	#加钱
+		self.setShare(_shareIndex, _num, DEC_FLAG)	#减股票
+
+	def howManySharesIHold(self, _shareIndex):
+		return self.stockHolding[_shareIndex]
+
 
 

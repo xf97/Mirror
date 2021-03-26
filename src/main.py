@@ -18,16 +18,18 @@ from share import shareClass as sc
 from transaction import transactionClass as tc
 from annualReport import annualReportClass as arc
 from constant import *
+#交易函数
+from makeDeals import *
 #excel读写类
 from excel2Dict import ExcelToDict
 
 
 #常量部分
 LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 500	#参与账户数量
+USERS_NUM = 2	#500	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 10 #239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [10] * 10 #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -41,7 +43,7 @@ class mirror:
 		self.initFund = 0	#每个人持有的初始资金
 		self.sharesList = self.initShares(SHARES_NUM)
 		self.accountsList = self.initAccounts(USERS_NUM, self.initFund, self.sharesList)
-		self.transactionRecord = tc(SHARE_NUMBER)	#交易记录
+		self.transactionRecord = tc(SHARES_NUM)	#交易记录
 		#初始化日志记录
 		#todo
 
@@ -160,7 +162,8 @@ class mirror:
 											#那么进入买方卖方出价环节
 											#要有交易记录的
 											#买方账户、卖方账户、交易记录
-											doTransaction(accountsList, userIndex, anotherUserIndex, sharesList, shareIndex, transactionRecord)
+											#直接在原数据上修改
+											doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord)
 										else:
 											#不想卖
 											continue
@@ -176,7 +179,7 @@ class mirror:
 				nowDay += 1
 				#要记得挪动出价区间
 				#更新交易记录
-				transactionRecord.newDayComes()
+				self.transactionRecord.newDayComes()
 				print(nowYear, nowMonth, nowDay)
 			#一年结束
 			nowYear += 1
