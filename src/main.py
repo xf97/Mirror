@@ -41,6 +41,7 @@ class mirror:
 		self.initFund = 0	#每个人持有的初始资金
 		self.sharesList = self.initShares(SHARES_NUM)
 		self.accountsList = self.initAccounts(USERS_NUM, self.initFund, self.sharesList)
+		self.transactionRecord = tc(SHARE_NUMBER)	#交易记录
 		#初始化日志记录
 		#todo
 
@@ -154,13 +155,15 @@ class mirror:
 									#找到持有这只股票的账户
 									if self.accountsList[anotherUserIndex].doIOwnThisStock(shareIndex):
 										#然后看这个账户想不想卖这只股票
-										if random.random() <= SELL_PROB:
+										if random.random() < SELL_PROB:
 											#想卖
 											#那么进入买方卖方出价环节
-											pass
+											#要有交易记录的
+											#买方账户、卖方账户、交易记录
+											doTransaction(accountsList, userIndex, anotherUserIndex, sharesList, shareIndex, transactionRecord)
 										else:
 											#不想卖
-											pass
+											continue
 									else:
 										continue
 						else:
@@ -171,6 +174,9 @@ class mirror:
 					#记录数据
 					nowMonth += 1
 				nowDay += 1
+				#要记得挪动出价区间
+				#更新交易记录
+				transactionRecord.newDayComes()
 				print(nowYear, nowMonth, nowDay)
 			#一年结束
 			nowYear += 1
