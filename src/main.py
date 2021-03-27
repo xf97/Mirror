@@ -25,11 +25,12 @@ from excel2Dict import ExcelToDict
 
 
 #常量部分
+INIT_TRANS_DAYS = 20	#初始化天数 
 LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 2	#500	#参与账户数量
+USERS_NUM = 10	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 10 #239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = [10] * 10 #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 30 #239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [30] * 12 #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -42,12 +43,14 @@ class mirror:
 		#self.annualReportDict = self.initAnnualReports(SHARES_NUM)
 		self.initFund = 0	#每个人持有的初始资金
 		self.sharesList = self.initShares(SHARES_NUM)
-		self.accountsList = self.initAccounts(USERS_NUM, self.initFund, self.sharesList)
+		self.accountsList = self.initAccounts_1(USERS_NUM, self.initFund, self.sharesList)
 		self.transactionRecord = tc(SHARES_NUM)	#交易记录
+		self.initAccounts_2(INIT_TRANS_DAYS)
 		#初始化日志记录
 		#todo
 
 	def initShares(self, _sharesNum):
+		print("\r股票初始化...ing", end = "")
 		#初始化每只股票，包括价格、价格上下限、总股数、想买的概率(20年的，以数组形式)、当日是否允许再交易(涨跌停)
 		#价格，id，总数和股票数量
 		shareInfo = ExcelToDict(DATA_PATH)
@@ -88,9 +91,11 @@ class mirror:
 		for obj in sharesList:
 			print(obj)
 		'''
+		print("\r股票初始化...Done")
 		return sharesList
 
-	def initAccounts(self, _accountsNum, _initFund, _sharesList):
+	def initAccounts_1(self, _accountsNum, _initFund, _sharesList):
+		print("\r账户初始化...ing", end = "")
 		#初始化每个账户，包括现有资金、50只股票的持有情况、利息账户
 		accountsList = list()
 		#要每只股票的总股数和价格
@@ -101,18 +106,20 @@ class mirror:
 			sharePrice = obj.getPrice()
 			shareInfoList[shareId - 1] = [shareNum, sharePrice]
 		#每次初始化两个用户，前一个初始化资金不足的由第二个补上
-		for i in range(_accountsNum // 2):
+		i = 1
+		while i <= _accountsNum:
 			account1Ratio = random.randint(0, 100)	#账户1用来购买股票的资金比例
 			account2Ratio = min(100, 100.1 - account1Ratio) 	#账户2用来购买股票的资金比例
 			#print(account1Ratio, account2Ratio, account1Ratio + account2Ratio)
-			account1 = ac(i + 1, self.initFund, shareInfoList)	#账户1
-			account2 = ac(i + 251, self.initFund, shareInfoList)	#账户2
+			account1 = ac(i , self.initFund, shareInfoList)	#账户1
+			account2 = ac(i + 1, self.initFund, shareInfoList)	#账户2
 			#出资购买股票，返回值是新的shareInfoList
 			shareInfoList = account1.initHoldShares(account1Ratio, shareInfoList)
 			shareInfoList = account2.initHoldShares(account2Ratio, shareInfoList)
 			#把两个对象加入账户列表
 			accountsList.append(account1)
 			accountsList.append(account2)
+			i += 2
 		#print([i[0] for i in shareInfoList])
 		'''
 		for i in accountsList:
@@ -120,6 +127,53 @@ class mirror:
 		'''
 		return accountsList
 
+	#自动交易以进一步分配股票和资金
+	def initAccounts_2(self, _days):
+		#初始化阶段无需更新涨跌停，也无需关心出范围
+		nowDay = 1
+		while nowDay <= _days:
+			#print(nowDay)
+			#对于每一个账户
+			for userIndex in range(len(self.accountsList)):
+				#对于每位用户
+				for shareIndex in range(len(self.sharesList)):
+					#对于每只股票
+					#想买吗
+					if random.random() < self.sharesList[shareIndex].getPurchaseProb(0):
+						#想买
+						#去问其他账户
+						for anotherUserIndex in range(len(self.accountsList)):
+							if anotherUserIndex == userIndex:
+								#不跟自己做交易
+								continue
+							else:
+								#找到持有这只股票的账户
+								if self.accountsList[anotherUserIndex].doIOwnThisStock(shareIndex):
+									#然后看这个账户想不想卖这只股票
+									if random.random() < SELL_PROB:
+										#想卖
+										#那么进入买方卖方出价环节
+										#要有交易记录的
+										#买方账户、卖方账户、交易记录
+										#直接在原数据上修改
+										doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord)
+									else:
+										#不想卖
+										continue
+								else:
+									continue
+					else:
+						#不想买，去问其他股票
+						continue
+			process = int(nowDay / _days * 100)
+			#print(process)
+			print("\r账户初始化进度：" + str(process) +"%", end = "")
+			nowDay += 1
+			#更新交易记录
+			self.transactionRecord.newDayComes()
+		print("\n")
+		#清空交易记录
+		self.transactionRecord.clear()
 
 	def initAnnualReports(self, _sharesNum):
 		#暂不需要
@@ -145,8 +199,8 @@ class mirror:
 					#对于每位用户
 					for shareIndex in range(len(self.sharesList)):
 						#对于每只股票
-						#想买吗
-						if random.random() < self.sharesList[shareIndex].getPurchaseProb(nowYear - 1):
+						#想买吗，并且该只股票今天还可以买吗
+						if self.sharesList[shareIndex].getStopFlag != True and random.random() < self.sharesList[shareIndex].getPurchaseProb(nowYear - 1):
 							#想买
 							#去问其他账户
 							for anotherUserIndex in range(len(self.accountsList)):
@@ -178,60 +232,22 @@ class mirror:
 					nowMonth += 1
 				nowDay += 1
 				#要记得挪动出价区间
+				#重置交易标志
+				for share in self.sharesList:
+					share.resetStopFlag()
 				#更新交易记录
 				self.transactionRecord.newDayComes()
-				print(nowYear, nowMonth, nowDay)
+				print("*" * 20, str(nowDay), "*" * 20)
 			#一年结束
 			nowYear += 1
 			nowDay = 1
 			nowMonth = 1
-			'''
-			if nowYear != 1:
-				#第一年的数据已经初始化
-				#初始化其他年的股票数据
-				self.sharesList = self.updateShares(self.annualReportDict, nowYear)
-			while nowDay <= 360:
-				#开始模拟一年的交易
-				#初始化当日交易记录数据存储结构
-				if nowDay % DAYS_IN_1_MONTH == 0:
-					#满一个月，记录当月的信息
-					pass
-				for userIndex in range(len(accountsList)):
-					#对于每位用户
-					for shareIndex in range(len(sharesList)):
-						#对于每只股票
-						#想买吗
-						if random.random() < 该只股票的购买概率:
-							#想买
-							#那么询问除了他以外的所有人
-							for anotherUserIndex in range(len(accountsList)):
-								if anotherUserIndex == userIndex:
-									#不跟自己交易
-									continue
-								else:
-									#找到了别人，首先看这个人手上有没有持有
-									if random.random() < SALE_PROBABILITY and 这个人手上有这只股票:
-										#这个人有这只股票并且也想卖
-										#那么出价
-										#买方出价
-										#卖方出价
-										#比较，若买方>卖方, 成交
-										#计算交易股数-受买方资金限制
-										#扣除买方的资金，增加买方的该只股票
-										#增加卖方的资金，扣除卖方的股票
-										#记录交易
-									else:
-										continue
-						else:
-							#不想买这一只，去问其他股票
-							continue
-				#当天交易结束
-				#汇总当天交易记录，可能要重新计算股价
-				nowDay += 1
-			#一年交易结束
-			#汇总当年的交易记录，可能需要存盘
-			nowYear += 1
-		'''
+		#看看交易后能不能把账户数据打出来
+		for account in self.accountsList:
+			print(account)
+		#股票交易数量
+		print(self.transactionRecord.getTotalTransactionNum())
+
 
 #单元测试
 if __name__ == "__main__":

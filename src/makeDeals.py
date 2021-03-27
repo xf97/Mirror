@@ -39,6 +39,10 @@ def getPrice(_low, _high):
 	else:
 		return price
 
+'''
+注意，好像没有更新出价范围--要根据交易调整实时调整出价范围
+注意，涨跌停也没做--再完善
+'''
 def doTransaction(_accountsList, \
 				  _user1Index, \
 				  _user2Index, \
@@ -61,16 +65,18 @@ def doTransaction(_accountsList, \
 		#注意，买卖的股票数量不能多于卖方持有的数量
 		num = _accountsList[_user1Index].howManySharesICanBuy(user1Price)
 		num = min(num, _accountsList[_user2Index].howManySharesIHold(_shareIndex))
-		#如果小于最小交易数
-		if num <LEAST_NUM:
+		#如果小于等于最小交易数
+		if num <= LEAST_NUM:
 			#全部买了
 			#一个加钱减股票，一个减钱加股票
 			_accountsList[_user1Index].buyShares(num, user1Price, _shareIndex)
 			_accountsList[_user2Index].sellShares(num, user1Price, _shareIndex)
+			#最后调整价格
+			_sharesList[_shareIndex].setPrice(user1Price)
 			#然后记录交易
-			print("xixi")
-			print("发生交易: 第%d只股票交易%d股" % (_shareIndex, num))
+			print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，交易价格-%.2f，该只股票出价范围-[%.2f, %.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, num, user1Price, _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getBidRange()[1]))
 			_transactionRecord.newTransactionComes(_shareIndex, num)
+			return
 		else:	
 			#买随机的整股数
 			#该函数生成[LEAST_NUM, num]间的，步长为100的随机数
@@ -78,9 +84,10 @@ def doTransaction(_accountsList, \
 			_accountsList[_user1Index].buyShares(roundSum, user1Price, _shareIndex)
 			_accountsList[_user2Index].sellShares(roundSum, user1Price, _shareIndex)
 			#然后记录交易
-			print("hahah")
-			print("发生交易: 第%d只股票交易%d股" % (_shareIndex, roundSum))
+			print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，交易价格-%.2f，该只股票出价范围-[%.2f, %.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, roundSum, user1Price, _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getBidRange()[1]))
 			_transactionRecord.newTransactionComes(_shareIndex, roundSum)
+			#最后调整价格
+			_sharesList[_shareIndex].setPrice(user1Price)
 			return
 	else:
 		#否则直接不做什么，返回

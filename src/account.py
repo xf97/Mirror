@@ -27,7 +27,7 @@ class accountClass:
 	def __str__(self):
 		msg = str()
 		msg += ("当前账户编号： " + str(self.accountId) + "\n")
-		msg += ("当前资金： " + str(self.fund) + "\n")
+		msg += ("当前资金： %.2f\n" % (self.fund))
 		msg += ("股票持有情况： \n")
 		for index, i in enumerate(self.stockHolding):
 			if i != 0:

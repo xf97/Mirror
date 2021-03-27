@@ -53,8 +53,10 @@ class shareClass:
 	def setPrice(self, _newPrice):
 		if _newPrice > self.bidHighLimit or _newPrice < self.bidLowLimit:
 			raise Exception("无效的价格 %d" % _newPrice)
+			return False
 		elif self.getStopFlag() == True:
-			raise Exception("本日交易因涨跌停终止。")
+			print("本日针对第%d只交易因涨跌停终止。" % (self.shareId))
+			return False
 		else:
 			#否则是有效价格
 			#价格上升，更新上下限
@@ -74,6 +76,7 @@ class shareClass:
 			   math.isclose(self.price, self.bidLowLimit):
 				#达到上下限，涨停或跌停
 				self.stopFlag = True
+			return True
 
 	def getPrice(self):
 		return self.price
