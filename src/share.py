@@ -120,7 +120,7 @@ class shareClass:
 	def dailyInit(self, _newPrice = 0.0):
 		#更新价格，更新出价范围，更新交易准许符
 		if not math.isclose(_newPrice, 0.0):
-			self.setPrice(_newPrice)
+			self.setPrice(_newPrice, UNABLE_STOP_FLAG)
 		self.resetStopFlag()
 		self.setLowerAndUpperLimit()
 

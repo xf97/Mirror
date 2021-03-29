@@ -27,10 +27,10 @@ from excel2Dict import ExcelToDict
 #常量部分
 INIT_TRANS_DAYS = 20	#初始化天数 
 LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 10	#参与账户数量
+USERS_NUM = 500	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 30 #239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = [30] * 12 #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -136,7 +136,9 @@ class mirror:
 			#对于每一个账户
 			for userIndex in range(len(self.accountsList)):
 				#对于每位用户
-				for shareIndex in range(len(self.sharesList)):
+				shareIndexList = list(range(len(self.sharesList)))
+				random.shuffle(shareIndexList)	#随机打乱顺序
+				for shareIndex in shareIndexList:
 					#对于每只股票
 					#想买吗
 					if random.random() < self.sharesList[shareIndex].getPurchaseProb(0):
@@ -197,7 +199,9 @@ class mirror:
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):
 					#对于每位用户
-					for shareIndex in range(len(self.sharesList)):
+					shareIndexList = list(range(len(self.sharesList)))
+					random.shuffle(shareIndexList)	#随机打乱顺序
+					for shareIndex in shareIndexList:
 						#对于每只股票
 						#今天还可以买吗-有没有被前面的人所买涨跌停了
 						if self.sharesList[shareIndex].getStopFlag() == True:
@@ -209,7 +213,7 @@ class mirror:
 							#去问其他账户
 							for anotherUserIndex in range(len(self.accountsList)):
 								if self.sharesList[shareIndex].getStopFlag() == True:
-									print("今日第%d只股票交易已经锁止" % (shareIndex + 1))
+									#print("今日第%d只股票交易已经锁止" % (shareIndex + 1))
 									#股票锁止，今日该股票的交易
 									break
 								if anotherUserIndex == userIndex:
@@ -257,13 +261,13 @@ class mirror:
 					else:
 						#否则根据相对交易量，计算涨跌额度
 						#获得该只股票今日交易量
-						thisShareNum = self.transactionRecord.getTodayTransNum(index)
+						#thisShareNum = self.transactionRecord.getTodayTransNum(index)
 						#再获得今日平均交易量
-						aveShareNum = self.transactionRecord.getTodayAveTransNum()
-						
+						#aveShareNum = self.transactionRecord.getTodayAveTransNum()
+						share.dailyInit()
 				#更新交易记录
 				self.transactionRecord.newDayComes()
-				print("*" * 20, str(nowDay), "*" * 20)
+				print("*" * 20, str(nowYear) + " ", str(nowDay), "*" * 20)
 			#一年结束
 			nowYear += 1
 			nowDay = 1
