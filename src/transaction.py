@@ -35,6 +35,10 @@ class transactionClass:
 	def getTodayTransNum(self, _shareIndex):
 		return self.todayTransactionList[_shareIndex]
 
+	#获得今天一只股票的交易平均值
+	def getTodayAveTransNum(self):
+		return sum(self.todayTransactionList)/ len(self.todayTransactionList)
+
 	#获得昨日股票的平均交易数量
 	def getYesterdayAveTransNum(self):
 		return sum(self.yesterdayTransactionList) / len(self.yesterdayTransactionList)

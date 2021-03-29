@@ -135,10 +135,12 @@ class accountClass:
 		#减钱，加股票
 		self.setFund(_num * _price, DEC_FLAG)	#减钱
 		self.setShare(_shareIndex, _num, INC_FLAG)	#加股票
+		return True
 
 	def sellShares(self, _num, _price, _shareIndex):
 		self.setFund(_num * _price, INC_FLAG)	#加钱
 		self.setShare(_shareIndex, _num, DEC_FLAG)	#减股票
+		return True
 
 	def howManySharesIHold(self, _shareIndex):
 		return self.stockHolding[_shareIndex]

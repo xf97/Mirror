@@ -156,7 +156,7 @@ class mirror:
 										#要有交易记录的
 										#买方账户、卖方账户、交易记录
 										#直接在原数据上修改
-										doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord)
+										doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 0)
 									else:
 										#不想卖
 										continue
@@ -199,16 +199,25 @@ class mirror:
 					#对于每位用户
 					for shareIndex in range(len(self.sharesList)):
 						#对于每只股票
-						#想买吗，并且该只股票今天还可以买吗
-						if self.sharesList[shareIndex].getStopFlag != True and random.random() < self.sharesList[shareIndex].getPurchaseProb(nowYear - 1):
+						#今天还可以买吗-有没有被前面的人所买涨跌停了
+						if self.sharesList[shareIndex].getStopFlag() == True:
+							continue
+						#想买吗
+						#买卖的过程中，会导致涨跌停
+						if random.random() < self.sharesList[shareIndex].getPurchaseProb(nowYear - 1):
 							#想买
 							#去问其他账户
 							for anotherUserIndex in range(len(self.accountsList)):
+								if self.sharesList[shareIndex].getStopFlag() == True:
+									print("今日第%d只股票交易已经锁止" % (shareIndex + 1))
+									#股票锁止，今日该股票的交易
+									break
 								if anotherUserIndex == userIndex:
 									#不跟自己做交易
 									continue
 								else:
 									#找到持有这只股票的账户
+									#一次交易过程中会发生涨跌停
 									if self.accountsList[anotherUserIndex].doIOwnThisStock(shareIndex):
 										#然后看这个账户想不想卖这只股票
 										if random.random() < SELL_PROB:
@@ -217,14 +226,15 @@ class mirror:
 											#要有交易记录的
 											#买方账户、卖方账户、交易记录
 											#直接在原数据上修改
-											doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord)
+											doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 1)
+											#注意，这个过程会触发涨跌停
 										else:
 											#不想卖
 											continue
 									else:
 										continue
 						else:
-							#不想买，去问其他股票
+							#不想买，去问其他股票，或者已经涨跌停
 							continue
 				if nowDay == DAYS_IN_1_MONTH[nowMonth - 1]:
 					#达到当月最后一天
@@ -232,9 +242,25 @@ class mirror:
 					nowMonth += 1
 				nowDay += 1
 				#要记得挪动出价区间
-				#重置交易标志
-				for share in self.sharesList:
-					share.resetStopFlag()
+				#先计算每个股票的相等成交量
+				for index, share in enumerate(self.sharesList):
+					#获得该只股票今日交易量
+					thisShareNum = self.transactionRecord.getTodayTransNum(index)
+					#再获得今日平均交易量
+					aveShareNum = self.transactionRecord.getTodayAveTransNum()
+				#根据交易记录调整价格
+				for index, share in enumerate(self.sharesList):
+					#如果达到涨跌停值，那么第二天开盘价格就是这个涨跌停值
+					if share.getStopFlag() == True:
+						#重置价格，重置涨跌停标志，重置出价上下限
+						share.dailyInit(share.getPrice())
+					else:
+						#否则根据相对交易量，计算涨跌额度
+						#获得该只股票今日交易量
+						thisShareNum = self.transactionRecord.getTodayTransNum(index)
+						#再获得今日平均交易量
+						aveShareNum = self.transactionRecord.getTodayAveTransNum()
+						
 				#更新交易记录
 				self.transactionRecord.newDayComes()
 				print("*" * 20, str(nowDay), "*" * 20)

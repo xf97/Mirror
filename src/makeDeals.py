@@ -41,14 +41,16 @@ def getPrice(_low, _high):
 
 '''
 注意，好像没有更新出价范围--要根据交易调整实时调整出价范围
-注意，涨跌停也没做--再完善
+注意，涨跌停也没做--再完善--Done
 '''
+#_flag用于在初始化阶段忽视涨跌停规则，另外，不打印
 def doTransaction(_accountsList, \
 				  _user1Index, \
 				  _user2Index, \
 				  _sharesList, \
 				  _shareIndex, \
-				  _transactionRecord):
+				  _transactionRecord,
+				  _flag):
 	#双方先出价
 	#获得出价区间
 	lowLimit, highLimit = _sharesList[_shareIndex].getBidRange()
@@ -69,25 +71,27 @@ def doTransaction(_accountsList, \
 		if num <= LEAST_NUM:
 			#全部买了
 			#一个加钱减股票，一个减钱加股票
-			_accountsList[_user1Index].buyShares(num, user1Price, _shareIndex)
+			_accountsList[_user1Index].buyShares(num, user1Price, _shareIndex)  
 			_accountsList[_user2Index].sellShares(num, user1Price, _shareIndex)
 			#最后调整价格
-			_sharesList[_shareIndex].setPrice(user1Price)
+			_sharesList[_shareIndex].setPrice(user1Price, _flag)
 			#然后记录交易
-			print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，交易价格-%.2f，该只股票出价范围-[%.2f, %.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, num, user1Price, _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getBidRange()[1]))
+			if _flag == 1:
+				print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，买方出价-%.2f，卖方出价-%.2f, 交易价格-%.2f，该只股票出价范围-[%.2f, %.2f，%.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, num, user1Price, user2Price, user1Price, _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getPrice(), _sharesList[_shareIndex].getBidRange()[1]))
 			_transactionRecord.newTransactionComes(_shareIndex, num)
 			return
 		else:	
 			#买随机的整股数
 			#该函数生成[LEAST_NUM, num]间的，步长为100的随机数
 			roundSum = random.randrange(LEAST_NUM, num, LEAST_NUM)	
-			_accountsList[_user1Index].buyShares(roundSum, user1Price, _shareIndex)
+			_accountsList[_user1Index].buyShares(roundSum, user1Price, _shareIndex) 
 			_accountsList[_user2Index].sellShares(roundSum, user1Price, _shareIndex)
 			#然后记录交易
-			print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，交易价格-%.2f，该只股票出价范围-[%.2f, %.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, roundSum, user1Price, _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getBidRange()[1]))
+			if _flag == 1:
+				print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，买方出价-%.2f，卖方出价-%.2f, 交易价格-%.2f，该只股票出价范围-[%.2f, %.2f，%.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, roundSum, user1Price, user2Price, user1Price, _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getPrice(), _sharesList[_shareIndex].getBidRange()[1]))
 			_transactionRecord.newTransactionComes(_shareIndex, roundSum)
 			#最后调整价格
-			_sharesList[_shareIndex].setPrice(user1Price)
+			_sharesList[_shareIndex].setPrice(user1Price, _flag)
 			return
 	else:
 		#否则直接不做什么，返回

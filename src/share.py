@@ -6,6 +6,8 @@ python version: 3.7
 该类用于定义单只股票的数据结构
 '''
 __author__ = "xiaofeng"
+ENABLE_STOP_FLAG = 1
+UNABLE_STOP_FLAG = 0
 
 from constant import *
 import math
@@ -23,6 +25,8 @@ class shareClass:
 		self.bidLowLimit = self.priceLowerLimit 	#出价下限
 		self.bidHighLimit = self.priceUpperLimit	#出价上限
 		self.stopFlag = False	#可否交易标志
+		self.upStopFlag = False	#涨停标志
+		self.downStopFlag = False #跌停标志
 		self.shareId = _id	#股票ID
 
 	#打印对象使用
@@ -50,12 +54,13 @@ class shareClass:
 		self.bidLowLimit = self.priceLowerLimit
 		self.bidHighLimit = self.priceUpperLimit
 
-	def setPrice(self, _newPrice):
+	#_flag用于忽视涨跌停规则，用于初始化股票时
+	def setPrice(self, _newPrice, _flag):
 		if _newPrice > self.bidHighLimit or _newPrice < self.bidLowLimit:
 			raise Exception("无效的价格 %d" % _newPrice)
 			return False
 		elif self.getStopFlag() == True:
-			print("本日针对第%d只交易因涨跌停终止。" % (self.shareId))
+			print("本日针对第%d只股票的交易价格触发涨跌停条件，今日不再对该股票进行交易" % (self.shareId))
 			return False
 		else:
 			#否则是有效价格
@@ -72,11 +77,17 @@ class shareClass:
 			self.price = _newPrice
 			#判断是否涨停或跌停
 			#注意浮点数比较相等
-			if math.isclose(self.price, self.bidHighLimit) or \
-			   math.isclose(self.price, self.bidLowLimit):
-				#达到上下限，涨停或跌停
-				self.stopFlag = True
-			return True
+			if _flag == UNABLE_STOP_FLAG:
+				#不启用涨跌停规则
+				return True
+			elif _flag == ENABLE_STOP_FLAG:
+				if math.isclose(self.price, self.bidHighLimit):
+					#涨停
+					self.upStopFlag = True
+				elif math.isclose(self.price, self.bidLowLimit):
+					#跌停
+					self.downStopFlag = True
+				return True
 
 	def getPrice(self):
 		return self.price
@@ -97,10 +108,11 @@ class shareClass:
 		return (self.bidLowLimit, self.bidHighLimit)
 
 	def getStopFlag(self):
-		return self.stopFlag
+		return self.upStopFlag or self.downStopFlag
 
 	def resetStopFlag(self):
-		self.stopFlag = False
+		self.upStopFlag = False
+		self.downStopFlag = False
 
 	def getShareId(self):
 		return self.shareId
