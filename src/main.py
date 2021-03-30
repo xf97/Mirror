@@ -190,6 +190,9 @@ class mirror:
 		#根据当前年份，更新股票的数据
 		pass
 
+	'''
+	可能需要引入numpy来返回符合正态分布的数据，来增大出价不触发涨停的概率
+	'''
 	def run(self):
 		#进行交易
 		nowYear = 1	#当前年份
@@ -249,7 +252,6 @@ class mirror:
 						else:
 							#不想买，去问其他股票，或者已经涨跌停
 							continue
-				nowDay += 1
 				#要记得挪动出价区间
 				#先计算每个股票的相对成交量
 				#获得今日平均成交量
@@ -282,13 +284,14 @@ class mirror:
 					#达到当月最后一天
 					#记录数据
 					infoDict[nowMonth] = [share.getPrice() for share in self.sharesList]
-					nowMonth += 1
+					nowMonth += 1	
+				nowDay += 1
 			#一年结束
+			#记录本年数据
+			dict2Excel(nowYear, infoDict)
 			nowYear += 1
 			nowDay = 1
 			nowMonth = 1
-			#记录本年数据
-			dict2Excel(nowYear, infoDict)
 			#然后置空	
 			infoDict.clear()
 		#看看交易后能不能把账户数据打出来

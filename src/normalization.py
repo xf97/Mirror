@@ -22,7 +22,11 @@ def normalization(_list, _highLimit, _lowLimit):
 	minValue = min(_list)
 	resultList = [0.0] * len(_list)
 	for index, value in enumerate(_list):
-		resultList[index] = (((value - minValue) / (maxValue - minValue)) * _highLimit + ((value - maxValue) / (minValue - maxValue)) * _lowLimit)
+		try:
+			resultList[index] = (((value - minValue) / (maxValue - minValue)) * _highLimit + ((value - maxValue) / (minValue - maxValue)) * _lowLimit)
+		except ZeroDivisionError:
+			#对除0错误进行处理
+			resultList[index] = 1.0
 	return resultList
 
 #单元测试
