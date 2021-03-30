@@ -24,7 +24,7 @@ from makeDeals import *
 from normalization import *
 #excel读写类
 from excel2Dict import ExcelToDict
-
+from dict2Excel import *
 
 #常量部分
 INIT_TRANS_DAYS = 20	#初始化天数 
@@ -198,9 +198,11 @@ class mirror:
 		#重置价格上下限
 		for share in self.sharesList:
 			share.dailyInit()
+		#信息记录字典
+		infoDict = dict()	#键是月份，值是当月所有股票的收盘价，每年重置一次
 		while nowYear <= 1:
 			#模拟二十年的
-			print("*" * 20, str(nowYear) + " ", str(nowDay), "*" * 20)
+			print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
 			while nowDay <= DAYS_IN_1_YEAR:
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):
@@ -252,6 +254,7 @@ class mirror:
 				#先计算每个股票的相对成交量
 				#获得今日平均成交量
 				aveShareNum = self.transactionRecord.getTodayAveTransNum()
+				#print(aveShareNum)
 				#相等成交量列表
 				relativeVolumeList = [0.0] * len(self.sharesList)
 				for index, share in enumerate(self.sharesList):
@@ -278,11 +281,16 @@ class mirror:
 				if nowDay == DAYS_IN_1_MONTH[nowMonth - 1]:
 					#达到当月最后一天
 					#记录数据
+					infoDict[nowMonth] = [share.getPrice() for share in self.sharesList]
 					nowMonth += 1
 			#一年结束
 			nowYear += 1
 			nowDay = 1
 			nowMonth = 1
+			#记录本年数据
+			dict2Excel(nowYear, infoDict)
+			#然后置空	
+			infoDict.clear()
 		#看看交易后能不能把账户数据打出来
 		for account in self.accountsList:
 			print(account)

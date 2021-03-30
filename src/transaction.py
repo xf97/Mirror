@@ -6,6 +6,8 @@ python version: 3.7
 该类用于定义交易数据(需要被存储的部分)的数据结构
 '''
 
+import math
+
 class transactionClass:
 	def __init__(self, _shareNum):
 		#因交易数据尚不明确, 此类暂不明确
@@ -37,7 +39,11 @@ class transactionClass:
 
 	#获得今天一只股票的交易平均值
 	def getTodayAveTransNum(self):
-		return sum(self.todayTransactionList)/ len(self.todayTransactionList)
+		result = sum(self.todayTransactionList)/ len(self.todayTransactionList)
+		#如果今日无交易，就用昨日的数据代替
+		if math.isclose(result, 0):
+			result = self.getYesterdayAveTransNum()
+		return result
 
 	#获得昨日股票的平均交易数量
 	def getYesterdayAveTransNum(self):
