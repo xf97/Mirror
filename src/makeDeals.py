@@ -57,6 +57,7 @@ def doTransaction(_accountsList, \
 	#然后买方卖方出价
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
+	#要注意出价主要集中在中间，而不在两边—待完成！
 	user1Price = getPrice(lowLimit, highLimit)
 	user2Price = getPrice(lowLimit, highLimit)
 	#只有买方出价大于等于卖方要价时，才交易

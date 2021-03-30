@@ -193,7 +193,7 @@ class mirror:
 		nowYear = 1	#当前年份
 		nowDay = 1	#当前天数
 		nowMonth = 1	#当前月份
-		while nowYear <= 2:
+		while nowYear <= 5:
 			#模拟二十年的
 			while nowDay <= DAYS_IN_1_YEAR:
 				#对于每一个账户
@@ -209,6 +209,7 @@ class mirror:
 						#想买吗
 						#买卖的过程中，会导致涨跌停
 						if random.random() < self.sharesList[shareIndex].getPurchaseProb(nowYear - 1):
+							#print("第%d只股票的交易概率-%.2f" % (shareIndex + 1, self.sharesList[shareIndex].getPurchaseProb(nowYear - 1)))
 							#想买
 							#去问其他账户
 							for anotherUserIndex in range(len(self.accountsList)):
