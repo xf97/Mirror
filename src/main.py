@@ -20,6 +20,8 @@ from annualReport import annualReportClass as arc
 from constant import *
 #交易函数
 from makeDeals import *
+#归一化公式
+from normalization import *
 #excel读写类
 from excel2Dict import ExcelToDict
 
@@ -27,10 +29,10 @@ from excel2Dict import ExcelToDict
 #常量部分
 INIT_TRANS_DAYS = 20	#初始化天数 
 LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 500	#参与账户数量
+USERS_NUM = 10	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 30 #239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [30] * 12 #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -193,8 +195,12 @@ class mirror:
 		nowYear = 1	#当前年份
 		nowDay = 1	#当前天数
 		nowMonth = 1	#当前月份
-		while nowYear <= 5:
+		#重置价格上下限
+		for share in self.sharesList:
+			share.dailyInit()
+		while nowYear <= 1:
 			#模拟二十年的
+			print("*" * 20, str(nowYear) + " ", str(nowDay), "*" * 20)
 			while nowDay <= DAYS_IN_1_YEAR:
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):
@@ -241,19 +247,23 @@ class mirror:
 						else:
 							#不想买，去问其他股票，或者已经涨跌停
 							continue
-				if nowDay == DAYS_IN_1_MONTH[nowMonth - 1]:
-					#达到当月最后一天
-					#记录数据
-					nowMonth += 1
 				nowDay += 1
 				#要记得挪动出价区间
-				#先计算每个股票的相等成交量
+				#先计算每个股票的相对成交量
+				#获得今日平均成交量
+				aveShareNum = self.transactionRecord.getTodayAveTransNum()
+				#相等成交量列表
+				relativeVolumeList = [0.0] * len(self.sharesList)
 				for index, share in enumerate(self.sharesList):
 					#获得该只股票今日交易量
 					thisShareNum = self.transactionRecord.getTodayTransNum(index)
-					#再获得今日平均交易量
-					aveShareNum = self.transactionRecord.getTodayAveTransNum()
+					#计算相对成交量
+					relativeVolumeList[index] = (thisShareNum) / aveShareNum
+				#然后对相对成交量进行一个归一化处理
+				#不在原值上修改，要保留变量
+				normalizationVolume = normalization(relativeVolumeList, UPPER_LIMIT - LOSS_VALUE, LOWER_LIMIT + LOSS_VALUE)
 				#根据交易记录调整价格
+				print("调整价格")
 				for index, share in enumerate(self.sharesList):
 					#如果达到涨跌停值，那么第二天开盘价格就是这个涨跌停值
 					if share.getStopFlag() == True:
@@ -261,14 +271,14 @@ class mirror:
 						share.dailyInit(share.getPrice())
 					else:
 						#否则根据相对交易量，计算涨跌额度
-						#获得该只股票今日交易量
-						#thisShareNum = self.transactionRecord.getTodayTransNum(index)
-						#再获得今日平均交易量
-						#aveShareNum = self.transactionRecord.getTodayAveTransNum()
-						share.dailyInit()
+						share.dailyInit(share.getPrice() * normalizationVolume[index])
 				#更新交易记录
 				self.transactionRecord.newDayComes()
-				print("*" * 20, str(nowYear) + " ", str(nowDay), "*" * 20)
+				print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
+				if nowDay == DAYS_IN_1_MONTH[nowMonth - 1]:
+					#达到当月最后一天
+					#记录数据
+					nowMonth += 1
 			#一年结束
 			nowYear += 1
 			nowDay = 1

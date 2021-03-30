@@ -56,10 +56,12 @@ class shareClass:
 
 	#_flag用于忽视涨跌停规则，用于初始化股票时
 	def setPrice(self, _newPrice, _flag):
+		'''
 		if _newPrice > self.bidHighLimit or _newPrice < self.bidLowLimit:
 			raise Exception("无效的价格 %d" % _newPrice)
 			return False
-		elif self.getStopFlag() == True:
+		'''
+		if self.getStopFlag() == True:
 			print("本日针对第%d只股票的交易价格触发涨跌停条件，今日不再对该股票进行交易" % (self.shareId))
 			return False
 		else:
@@ -106,6 +108,10 @@ class shareClass:
 	def getBidRange(self):
 		#返回出价范围
 		return (self.bidLowLimit, self.bidHighLimit)
+
+	def getLimitRange(self):
+		#返回出价限制范围
+		return (self.priceLowerLimit, self.priceUpperLimit)
 
 	def getStopFlag(self):
 		return self.upStopFlag or self.downStopFlag
