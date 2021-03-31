@@ -10,12 +10,18 @@ __author__ = "xiaofeng"
 
 #常量
 #偏移值，用于包含随机数上限
-STAND_BIAS = 0.1
+STAND_BIAS = 1e-8
+#标准差指定为1
+SIGMA = 1.0
 #最小整笔交易数
 LEAST_NUM = 100
+#正态分布数组长度
+NORMAL_LIST_LENGTH = 100
 
 #导入文件
 import random
+from scipy import stats as st
+import math
 #账户数据结构，股票数据结构，每日交易信息保存数据结构，年报数据结构，常量
 from account import accountClass as ac
 from share import shareClass as sc
@@ -31,13 +37,27 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
-def getPrice(_low, _high):
+def getPrice(_low, _high, _price):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
-	price = random.uniform(_low, _high + STAND_BIAS)
-	if price > _high:
-		return _high
-	else:
-		return price
+	lowerLimit = ((_low - _price) / SIGMA) - STAND_BIAS
+	upperLimit = ((_high - _price) / SIGMA) + STAND_BIAS
+	normalObj = st.truncnorm(lowerLimit, upperLimit, loc = _price, scale = SIGMA)
+	#为有足够的挑选范围，生成长度为10000的数组
+	normalList = list(normalObj.rvs(NORMAL_LIST_LENGTH))
+	#排序
+	normalList.sort()
+	#然后随机挑选
+	price1 = normalList[random.randint(0, NORMAL_LIST_LENGTH - 1)]
+	if price1 > _high:
+		price1 = _high
+	elif price1 < _low:
+		price1 = _low
+	price2 = normalList[random.randint(0, NORMAL_LIST_LENGTH - 1)]
+	if price2 > _high:
+		price2 = _high
+	elif price2 < _low:
+		price2 = _low
+	return price1, price2
 
 '''
 注意，好像没有更新出价范围--要根据交易调整实时调整出价范围
@@ -54,12 +74,13 @@ def doTransaction(_accountsList, \
 	#双方先出价
 	#获得出价区间
 	lowLimit, highLimit = _sharesList[_shareIndex].getBidRange()
+	price = _sharesList[_shareIndex].getPrice()
 	#然后买方卖方出价
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
 	#要注意出价主要集中在中间，而不在两边—待完成！
-	user1Price = getPrice(lowLimit, highLimit)
-	user2Price = getPrice(lowLimit, highLimit)
+	user1Price, user2Price = getPrice(lowLimit, highLimit, price)
+	#user2Price = getPrice(lowLimit, highLimit, price)
 	#只有买方出价大于等于卖方要价时，才交易
 	if user1Price >= user2Price:
 		#交易
@@ -104,4 +125,12 @@ def doTransaction(_accountsList, \
 
 
 if __name__ == "__main__":
-	pass
+	for i in range(100000):
+		print("\r%d" % i, end = "")
+		price = getPrice(7.36 * 0.9, 7.36 * 1.1, 7.36)
+		if math.isclose(price, 7.36 * 1.1):
+			print(price, "涨停")
+		elif math.isclose(price, 7.36 * 0.9):
+			print(price, "跌停")
+		else:
+			continue

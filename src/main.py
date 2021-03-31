@@ -132,6 +132,7 @@ class mirror:
 	#自动交易以进一步分配股票和资金
 	def initAccounts_2(self, _days):
 		#初始化阶段无需更新涨跌停，也无需关心出范围
+		#print("hahah")
 		nowDay = 1
 		while nowDay <= _days:
 			#print(nowDay)
@@ -160,7 +161,9 @@ class mirror:
 										#要有交易记录的
 										#买方账户、卖方账户、交易记录
 										#直接在原数据上修改
+										#print(1)
 										doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 0)
+										#print(2)
 									else:
 										#不想卖
 										continue
@@ -205,7 +208,7 @@ class mirror:
 		infoDict = dict()	#键是月份，值是当月所有股票的收盘价，每年重置一次
 		while nowYear <= 2:
 			#模拟二十年的
-			print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
+			#print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
 			while nowDay <= DAYS_IN_1_YEAR:
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):
