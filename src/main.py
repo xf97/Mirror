@@ -29,10 +29,10 @@ from dict2Excel import *
 #常量部分
 INIT_TRANS_DAYS = 20	#初始化天数 
 LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 500	#参与账户数量
+USERS_NUM = 350	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 48 #239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = list(range(4,49,4)) #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -206,7 +206,7 @@ class mirror:
 			share.dailyInit()
 		#信息记录字典
 		infoDict = dict()	#键是月份，值是当月所有股票的收盘价，每年重置一次
-		while nowYear <= 2:
+		while nowYear <= 1:
 			#模拟二十年的
 			#print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
 			while nowDay <= DAYS_IN_1_YEAR:

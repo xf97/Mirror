@@ -61,8 +61,11 @@ class shareClass:
 			raise Exception("无效的价格 %d" % _newPrice)
 			return False
 		'''
-		if self.getStopFlag() == True:
-			print("本日针对第%d只股票的交易价格触发涨跌停条件，今日不再对该股票进行交易" % (self.shareId))
+		if self.getUpStopFlag() == True:
+			print("本日针对第%d只股票的交易价格触发涨停条件，今日不再对该股票进行交易" % (self.shareId))
+			return False
+		elif self.getDownStopFlag() == True:
+			print("本日针对第%d只股票的交易价格触发跌停条件，今日不再对该股票进行交易" % (self.shareId))
 			return False
 		else:
 			#否则是有效价格
@@ -115,6 +118,12 @@ class shareClass:
 
 	def getStopFlag(self):
 		return self.upStopFlag or self.downStopFlag
+
+	def getUpStopFlag(self):
+		return self.upStopFlag
+
+	def getDownStopFlag(self):
+		return self.downStopFlag
 
 	def resetStopFlag(self):
 		self.upStopFlag = False
