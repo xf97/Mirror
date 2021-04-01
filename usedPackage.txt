@@ -2,3 +2,4 @@ rich
 openpyxl
 scipy
 xlsxwriter
+numpy

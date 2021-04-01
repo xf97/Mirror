@@ -11,8 +11,8 @@ __author__ = "xiaofeng"
 #常量
 #偏移值，用于包含随机数上限
 STAND_BIAS = 1e-8
-#标准差指定为1
-SIGMA = 1.0
+#标准差
+SIGMA = 1
 #最小整笔交易数
 LEAST_NUM = 100
 #正态分布数组长度
@@ -22,12 +22,14 @@ NORMAL_LIST_LENGTH = 100
 import random
 from scipy import stats as st
 import math
+import numpy
 #账户数据结构，股票数据结构，每日交易信息保存数据结构，年报数据结构，常量
 from account import accountClass as ac
 from share import shareClass as sc
 from transaction import transactionClass as tc
 from annualReport import annualReportClass as arc
 from constant import * 
+import time
 
 '''
 _user1是买方，_user2是卖方
@@ -37,10 +39,28 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
+def getNormalList(_low, _high, _loc):
+	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
+	normalList = numpy.random.normal(loc = _loc, scale = SIGMA, size = 300)
+	#intervalList = [i for i in normalList if i >= _low and i <= _high]
+	intervalList = normalList[numpy.where(normalList >= _low)]
+	intervalList = intervalList[numpy.where(intervalList <= _high)]
+	#添加涨跌值
+	#intervalList = numpy.append(intervalList, [_low, _high])
+	return intervalList
+
 def getPrice(_low, _high, _price):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
-	lowerLimit = ((_low - _price) / SIGMA) - STAND_BIAS
-	upperLimit = ((_high - _price) / SIGMA) + STAND_BIAS
+	#生成符合正态分布的数列
+	priceList = getNormalList(_low, _high, _price)
+	while len(priceList) <= 2:
+		priceList = getNormalList(_low, _high, _price)
+	#提取价格
+	price1 = numpy.random.choice(priceList)
+	price2 = numpy.random.choice(priceList)
+	#判断价格边界，已经符合价格边界
+	return price1, price2
+	'''
 	normalObj = st.truncnorm(lowerLimit, upperLimit, loc = _price, scale = SIGMA)
 	#为有足够的挑选范围，生成长度为10000的数组
 	normalList = list(normalObj.rvs(NORMAL_LIST_LENGTH))
@@ -58,6 +78,7 @@ def getPrice(_low, _high, _price):
 	elif price2 < _low:
 		price2 = _low
 	return price1, price2
+	'''
 
 '''
 注意，好像没有更新出价范围--要根据交易调整实时调整出价范围
@@ -125,12 +146,18 @@ def doTransaction(_accountsList, \
 
 
 if __name__ == "__main__":
+	stime = time.time()
+	a = 12.24
+	upperLimit = a * 1.1
+	lowerLimit = a * 0.9
 	for i in range(100000):
-		print("\r%d" % i, end = "")
-		price = getPrice(7.36 * 0.9, 7.36 * 1.1, 7.36)
-		if math.isclose(price, 7.36 * 1.1):
-			print(price, "涨停")
-		elif math.isclose(price, 7.36 * 0.9):
-			print(price, "跌停")
+		print("\r%d" % i, end = " ")
+		price = getPrice(lowerLimit, upperLimit, a)
+		if math.isclose(price[0], upperLimit):
+			print(price[0], "涨停")
+		elif math.isclose(price[0], lowerLimit):
+			print(price[0], "跌停")
 		else:
 			continue
+	etime = time.time()
+	print(etime - stime)
