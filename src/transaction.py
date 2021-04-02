@@ -47,7 +47,10 @@ class transactionClass:
 
 	#获得昨日股票的平均交易数量
 	def getYesterdayAveTransNum(self):
-		return sum(self.yesterdayTransactionList) / len(self.yesterdayTransactionList)
+		result = sum(self.yesterdayTransactionList) / len(self.yesterdayTransactionList)
+		if math.isclose(result, 0):
+			result = 1	#第一天，昨日无交易
+		return result
 
 	#获得每只股票总交易量
 	def getTotalTransactionNum(self, _index = -1):

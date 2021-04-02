@@ -39,6 +39,23 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
+def getNormalListBias(_low, _high, _loc, _bias):
+	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
+	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
+	meanValue = _loc * _bias
+	#print(_low, _high, _loc, _bias)
+	if math.isclose(meanValue, _high):
+		meanValue = _high
+	if math.isclose(meanValue, _low):
+		meanValue = _low
+	normalList = numpy.random.normal(loc = meanValue, scale = SIGMA, size = 2000)
+	#intervalList = [i for i in normalList if i >= _low and i <= _high]
+	intervalList = normalList[numpy.where(normalList >= _low)]
+	intervalList = intervalList[numpy.where(intervalList <= _high)]
+	#添加涨跌值
+	#intervalList = numpy.append(intervalList, [_low, _high])
+	return intervalList
+
 def getNormalList(_low, _high, _loc):
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
 	normalList = numpy.random.normal(loc = _loc, scale = SIGMA, size = 300)
@@ -49,12 +66,16 @@ def getNormalList(_low, _high, _loc):
 	#intervalList = numpy.append(intervalList, [_low, _high])
 	return intervalList
 
-def getPrice(_low, _high, _price):
+def getPrice(_low, _high, _price, _bias):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
 	#生成符合正态分布的数列
-	priceList = getNormalList(_low, _high, _price)
-	while len(priceList) <= 2:
-		priceList = getNormalList(_low, _high, _price)
+	priceList = getNormalListBias(_low, _high, _price, _bias)
+	#count = 0
+	while len(priceList) == 0:
+		#print("\r计算正态分布中...", end = "")
+		count += 1
+		priceList = getNormalListBias(_low, _high, _price, _bias)
+	#print("\n%d" % count)
 	#提取价格
 	price1 = numpy.random.choice(priceList)
 	price2 = numpy.random.choice(priceList)
@@ -91,7 +112,8 @@ def doTransaction(_accountsList, \
 				  _sharesList, \
 				  _shareIndex, \
 				  _transactionRecord,
-				  _flag):
+				  _flag,
+				  _normalVolume):
 	#双方先出价
 	#获得出价区间
 	lowLimit, highLimit = _sharesList[_shareIndex].getBidRange()
@@ -100,7 +122,7 @@ def doTransaction(_accountsList, \
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
 	#要注意出价主要集中在中间，而不在两边—待完成！
-	user1Price, user2Price = getPrice(lowLimit, highLimit, price)
+	user1Price, user2Price = getPrice(lowLimit, highLimit, price, _normalVolume[_shareIndex])
 	#user2Price = getPrice(lowLimit, highLimit, price)
 	#只有买方出价大于等于卖方要价时，才交易
 	if user1Price >= user2Price:
@@ -146,13 +168,25 @@ def doTransaction(_accountsList, \
 
 
 if __name__ == "__main__":
+	price = 41.28
+	for _ in range(100000):
+		a = getNormalListBias(price * 0.9, price * 1.1, price, 1.1)
+		print(len(a))
+		print("***" * 20)
+	'''
 	stime = time.time()
 	a = 12.24
 	upperLimit = a * 1.1
 	lowerLimit = a * 0.9
+	bigCount = 0
+	smallCount = 0
 	for i in range(100000):
 		print("\r%d" % i, end = " ")
 		price = getPrice(lowerLimit, upperLimit, a)
+		if price[0] > a:
+			bigCount += 1
+		else:
+			smallCount += 1
 		if math.isclose(price[0], upperLimit):
 			print(price[0], "涨停")
 		elif math.isclose(price[0], lowerLimit):
@@ -161,3 +195,5 @@ if __name__ == "__main__":
 			continue
 	etime = time.time()
 	print(etime - stime)
+	print(bigCount, smallCount)
+	'''

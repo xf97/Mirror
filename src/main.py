@@ -12,6 +12,7 @@ import logging
 import rich	#定制化输出
 import random
 import openpyxl	#操作ecxel文件
+import math
 #账户数据结构，股票数据结构，每日交易信息保存数据结构，年报数据结构，常量
 from account import accountClass as ac
 from share import shareClass as sc
@@ -27,7 +28,7 @@ from excel2Dict import ExcelToDict
 from dict2Excel import *
 
 #常量部分
-INIT_TRANS_DAYS = 20	#初始化天数 
+INIT_TRANS_DAYS = 20 #初始化天数 
 LAST_YEARS = 20	# 持续调查20年
 USERS_NUM = 500	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
@@ -134,6 +135,7 @@ class mirror:
 		#初始化阶段无需更新涨跌停，也无需关心出范围
 		#print("hahah")
 		nowDay = 1
+		normalizationVolume = [1.0] * len(self.sharesList)
 		while nowDay <= _days:
 			#print(nowDay)
 			#对于每一个账户
@@ -162,7 +164,7 @@ class mirror:
 										#买方账户、卖方账户、交易记录
 										#直接在原数据上修改
 										#print(1)
-										doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 0)
+										doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 0, normalizationVolume)
 										#print(2)
 									else:
 										#不想卖
@@ -210,9 +212,28 @@ class mirror:
 			#模拟二十年的
 			#print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
 			while nowDay <= DAYS_IN_1_YEAR:
+				#对于一天来说，昨天的交易成交量是固定的
+				#要记得挪动出价区间
+				#先计算每个股票的相对成交量
+				#获得昨日平均成交量
+				aveShareNum = self.transactionRecord.getYesterdayAveTransNum()
+				if math.isclose(aveShareNum, 1):
+					#第一天，昨日无成交
+					normalizationVolume = [1.0] * len(self.sharesList)	#就在原值进行改动
+				else: 
+					relativeVolumeList = [0.0] * len(self.sharesList)
+					for index, share in enumerate(self.sharesList):
+						#获得该只股票昨日交易量
+						thisShareNum = self.transactionRecord.getYesterdayTransNum(index)
+						#计算相对成交量
+						relativeVolumeList[index] = (thisShareNum) / aveShareNum
+					#然后对相对成交量进行一个归一化处理
+					#不在原值上修改，要保留变量
+					normalizationVolume = normalization(relativeVolumeList, UPPER_LIMIT, LOWER_LIMIT)
+				#print(normalizationVolume)
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):
-					#对于每位用户
+					#对于每位用户					
 					shareIndexList = list(range(len(self.sharesList)))
 					random.shuffle(shareIndexList)	#随机打乱顺序
 					for shareIndex in shareIndexList:
@@ -245,7 +266,7 @@ class mirror:
 											#要有交易记录的
 											#买方账户、卖方账户、交易记录
 											#直接在原数据上修改
-											doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 1)
+											doTransaction(self.accountsList, userIndex, anotherUserIndex, self.sharesList, shareIndex, self.transactionRecord, 1, normalizationVolume)
 											#注意，这个过程会触发涨跌停
 										else:
 											#不想卖
@@ -255,23 +276,11 @@ class mirror:
 						else:
 							#不想买，去问其他股票，或者已经涨跌停
 							continue
-				#要记得挪动出价区间
-				#先计算每个股票的相对成交量
-				#获得今日平均成交量
-				aveShareNum = self.transactionRecord.getTodayAveTransNum()
-				#print(aveShareNum)
-				#相等成交量列表
-				relativeVolumeList = [0.0] * len(self.sharesList)
-				for index, share in enumerate(self.sharesList):
-					#获得该只股票今日交易量
-					thisShareNum = self.transactionRecord.getTodayTransNum(index)
-					#计算相对成交量
-					relativeVolumeList[index] = (thisShareNum) / aveShareNum
-				#然后对相对成交量进行一个归一化处理
-				#不在原值上修改，要保留变量
-				normalizationVolume = normalization(relativeVolumeList, UPPER_LIMIT - LOSS_VALUE, LOWER_LIMIT + LOSS_VALUE)
 				#根据交易记录调整价格
 				#print("调整价格")
+				for share in self.sharesList:
+					share.dailyInit()
+				'''
 				for index, share in enumerate(self.sharesList):
 					#如果达到涨跌停值，那么第二天开盘价格就是这个涨跌停值
 					if share.getStopFlag() == True:
@@ -280,6 +289,7 @@ class mirror:
 					else:
 						#否则根据相对交易量，计算涨跌额度
 						share.dailyInit(share.getPrice() * normalizationVolume[index])
+				'''
 				#更新交易记录
 				self.transactionRecord.newDayComes()
 				print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
