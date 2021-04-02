@@ -70,11 +70,15 @@ def getPrice(_low, _high, _price, _bias):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
 	#生成符合正态分布的数列
 	priceList = getNormalListBias(_low, _high, _price, _bias)
-	#count = 0
+	count = 0
 	while len(priceList) == 0:
 		#print("\r计算正态分布中...", end = "")
 		count += 1
 		priceList = getNormalListBias(_low, _high, _price, _bias)
+		if count >= 1500:
+			print("%.2f %.2f %.2f %.1f" % (_low, _high, _price, _bias))
+			while len(priceList) <= 100:
+				numpy.append(priceList, random.uniform(_low, _high + LOSS_VALUE))
 	#print("\n%d" % count)
 	#提取价格
 	price1 = numpy.random.choice(priceList)
@@ -168,11 +172,19 @@ def doTransaction(_accountsList, \
 
 
 if __name__ == "__main__":
-	price = 41.28
-	for _ in range(100000):
-		a = getNormalListBias(price * 0.9, price * 1.1, price, 1.1)
-		print(len(a))
-		print("***" * 20)
+	price = 12.24
+	#for _ in range(100000):
+	a = getNormalListBias(price * 0.9, price * 1.1, price, 1.1)
+	bigCount = 0
+	smallCount = 0
+	for i in a:
+		if i > price:
+			bigCount += 1
+		elif i < price:
+			smallCount += 1
+	print(bigCount, smallCount)
+	#print(len(a))
+	#print("***" * 20)
 	'''
 	stime = time.time()
 	a = 12.24
