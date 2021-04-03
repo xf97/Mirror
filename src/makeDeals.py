@@ -12,7 +12,7 @@ __author__ = "xiaofeng"
 #偏移值，用于包含随机数上限
 STAND_BIAS = 1e-8
 #标准差
-SIGMA = 1
+SIGMA = 0.1
 #最小整笔交易数
 LEAST_NUM = 100
 #正态分布数组长度
@@ -44,12 +44,18 @@ def getNormalListBias(_low, _high, _loc, _bias):
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
 	meanValue = _loc * _bias
 	#print(_low, _high, _loc, _bias)
-	if math.isclose(meanValue, _high):
+	if meanValue > _high:
 		meanValue = _high
-	if math.isclose(meanValue, _low):
+	if meanValue < _low:
 		meanValue = _low
+	#添加损益值，避免太过夸张
+	if meanValue > _loc:
+		meanValue -= LOSS_VALUE
+	elif meanValue < _loc:
+		meanValue += LOSS_VALUE
 	normalList = numpy.random.normal(loc = meanValue, scale = SIGMA, size = 2000)
 	#intervalList = [i for i in normalList if i >= _low and i <= _high]
+	#print(len(normalList))
 	intervalList = normalList[numpy.where(normalList >= _low)]
 	intervalList = intervalList[numpy.where(intervalList <= _high)]
 	#添加涨跌值
@@ -75,10 +81,13 @@ def getPrice(_low, _high, _price, _bias):
 		#print("\r计算正态分布中...", end = "")
 		count += 1
 		priceList = getNormalListBias(_low, _high, _price, _bias)
-		if count >= 1500:
+		if count >= 10000:
 			print("%.2f %.2f %.2f %.1f" % (_low, _high, _price, _bias))
 			while len(priceList) <= 100:
-				numpy.append(priceList, random.uniform(_low, _high + LOSS_VALUE))
+				tempNum = random.uniform(_low, _high + LOSS_VALUE)
+				if tempNum >= _high:
+					tempNum = _high
+				priceList = numpy.append(priceList, tempNum)
 	#print("\n%d" % count)
 	#提取价格
 	price1 = numpy.random.choice(priceList)
@@ -120,12 +129,12 @@ def doTransaction(_accountsList, \
 				  _normalVolume):
 	#双方先出价
 	#获得出价区间
-	lowLimit, highLimit = _sharesList[_shareIndex].getBidRange()
+	lowLimit, highLimit = _sharesList[_shareIndex].getLimitRange()
 	price = _sharesList[_shareIndex].getPrice()
 	#然后买方卖方出价
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
-	#要注意出价主要集中在中间，而不在两边—待完成！
+	#要注意出价主要集中在中间，而不在两边—待完成——完成
 	user1Price, user2Price = getPrice(lowLimit, highLimit, price, _normalVolume[_shareIndex])
 	#user2Price = getPrice(lowLimit, highLimit, price)
 	#只有买方出价大于等于卖方要价时，才交易
@@ -172,8 +181,9 @@ def doTransaction(_accountsList, \
 
 
 if __name__ == "__main__":
-	price = 12.24
+	#price = 42.67
 	#for _ in range(100000):
+	'''
 	a = getNormalListBias(price * 0.9, price * 1.1, price, 1.1)
 	bigCount = 0
 	smallCount = 0
@@ -187,14 +197,14 @@ if __name__ == "__main__":
 	#print("***" * 20)
 	'''
 	stime = time.time()
-	a = 12.24
-	upperLimit = a * 1.1
-	lowerLimit = a * 0.9
+	a = 47.67
+	upperLimit = 47.69
+	lowerLimit = 42.90
 	bigCount = 0
 	smallCount = 0
 	for i in range(100000):
 		print("\r%d" % i, end = " ")
-		price = getPrice(lowerLimit, upperLimit, a)
+		price = getPrice(lowerLimit, upperLimit, a, 1.1)
 		if price[0] > a:
 			bigCount += 1
 		else:
@@ -208,4 +218,3 @@ if __name__ == "__main__":
 	etime = time.time()
 	print(etime - stime)
 	print(bigCount, smallCount)
-	'''
