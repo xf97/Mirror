@@ -12,7 +12,7 @@ __author__ = "xiaofeng"
 #偏移值，用于包含随机数上限
 STAND_BIAS = 1e-8
 #标准差
-SIGMA = 0.1
+SIGMA = 1
 #最小整笔交易数
 LEAST_NUM = 100
 #正态分布数组长度
@@ -39,9 +39,11 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
-def getNormalListBias(_low, _high, _loc, _bias):
+def getNormalListBias(_low, _high, _loc, _bias, _coolingValue):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
+	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
+	_bias = 1 + (_bias - 1) * _coolingValue
 	meanValue = _loc * _bias
 	#print(_low, _high, _loc, _bias)
 	if meanValue > _high:
@@ -53,10 +55,12 @@ def getNormalListBias(_low, _high, _loc, _bias):
 		meanValue -= LOSS_VALUE
 	elif meanValue < _loc:
 		meanValue += LOSS_VALUE
+	#print(meanValue)
 	normalList = numpy.random.normal(loc = meanValue, scale = SIGMA, size = 2000)
 	#intervalList = [i for i in normalList if i >= _low and i <= _high]
 	#print(len(normalList))
 	intervalList = normalList[numpy.where(normalList >= _low)]
+	#print(len(intervalList))
 	intervalList = intervalList[numpy.where(intervalList <= _high)]
 	#添加涨跌值
 	#intervalList = numpy.append(intervalList, [_low, _high])
@@ -72,10 +76,11 @@ def getNormalList(_low, _high, _loc):
 	#intervalList = numpy.append(intervalList, [_low, _high])
 	return intervalList
 
-def getPrice(_low, _high, _price, _bias):
+def getPrice(_low, _high, _price, _bias, _coolingValue):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
 	#生成符合正态分布的数列
-	priceList = getNormalListBias(_low, _high, _price, _bias)
+	#要抑制偏移的幅度
+	priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue)
 	count = 0
 	while len(priceList) == 0:
 		#print("\r计算正态分布中...", end = "")
@@ -90,6 +95,7 @@ def getPrice(_low, _high, _price, _bias):
 				priceList = numpy.append(priceList, tempNum)
 	#print("\n%d" % count)
 	#提取价格
+	#print(len(priceList), "****")
 	price1 = numpy.random.choice(priceList)
 	price2 = numpy.random.choice(priceList)
 	#判断价格边界，已经符合价格边界
@@ -131,11 +137,13 @@ def doTransaction(_accountsList, \
 	#获得出价区间
 	lowLimit, highLimit = _sharesList[_shareIndex].getLimitRange()
 	price = _sharesList[_shareIndex].getPrice()
+	#获得持续增长/跌幅的天数的冷却值
+	coolingValue = _sharesList[_shareIndex].getCoolingValue()
 	#然后买方卖方出价
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
 	#要注意出价主要集中在中间，而不在两边—待完成——完成
-	user1Price, user2Price = getPrice(lowLimit, highLimit, price, _normalVolume[_shareIndex])
+	user1Price, user2Price = getPrice(lowLimit, highLimit, price, _normalVolume[_shareIndex], coolingValue)
 	#user2Price = getPrice(lowLimit, highLimit, price)
 	#只有买方出价大于等于卖方要价时，才交易
 	if user1Price >= user2Price:
@@ -197,14 +205,14 @@ if __name__ == "__main__":
 	#print("***" * 20)
 	'''
 	stime = time.time()
-	a = 47.67
-	upperLimit = 47.69
-	lowerLimit = 42.90
+	a = 12.27
+	upperLimit = 12.27 * 1.1
+	lowerLimit = 12.27 * 0.9
 	bigCount = 0
 	smallCount = 0
 	for i in range(100000):
 		print("\r%d" % i, end = " ")
-		price = getPrice(lowerLimit, upperLimit, a, 1.1)
+		price = getPrice(lowerLimit, upperLimit, a, 0.9, 1/2)
 		if price[0] > a:
 			bigCount += 1
 		else:

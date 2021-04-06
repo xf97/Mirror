@@ -8,6 +8,7 @@ python version: 3.7
 __author__ = "xiaofeng"
 ENABLE_STOP_FLAG = 1
 UNABLE_STOP_FLAG = 0
+COOLING_VALUE_MOLE = 1	#冷却值分子
 
 from constant import *
 import math
@@ -16,6 +17,7 @@ class shareClass:
 	#_nOfShare means the number of the share
 	#_prob指的是账户想购买这只股票的概率
 	def __init__(self, _price, _nOfShare, _probList, _id):
+		self.prePrice = 0.0		#前一天的价格
 		self.price = _price 	#当前价格
 		self.number = _nOfShare	#股票数量
 		self.probList = _probList	#想买概率
@@ -28,6 +30,7 @@ class shareClass:
 		self.upStopFlag = False	#涨停标志
 		self.downStopFlag = False #跌停标志
 		self.shareId = _id	#股票ID
+		self.monotonousDays = 1	#单调递增或递减的天数
 
 	#打印对象使用
 	def __str__(self):
@@ -41,6 +44,9 @@ class shareClass:
 		msg += "\n"
 		return msg
 
+	def getCoolingValue(self):
+		return COOLING_VALUE_MOLE / self.monotonousDays
+
 	def getUpperLimit(self):
 		return self.price * UPPER_LIMIT
 
@@ -53,6 +59,21 @@ class shareClass:
 		self.priceLowerLimit = self.price * LOWER_LIMIT
 		self.bidLowLimit = self.priceLowerLimit
 		self.bidHighLimit = self.priceUpperLimit
+
+	def updateMonotonousDays(self, _newPrice):
+		#如果持续增加
+		if math.isclose(self.prePrice, 0.0):
+			#初值
+			self.monotonousDays = 1
+		elif self.price > self.prePrice and _newPrice > self.price:
+			#持续增加
+			self.monotonousDays += 1
+		elif self.price < self.prePrice and _newPrice < self.price:
+			#持续下跌
+			self.monotonousDays -= 1
+		else:
+			#否则，重置天数
+			self.monotonousDays = 1
 
 	#_flag用于忽视涨跌停规则，用于初始化股票时
 	def setPrice(self, _newPrice, _flag):
@@ -79,6 +100,11 @@ class shareClass:
 				tempHighLimit = self.priceUpperLimit
 			self.bidLowLimit = tempLowLimit
 			self.bidHighLimit = tempHighLimit
+			#确认要用新价格，则保存就价格			
+			#更新单调天数
+			self.updateMonotonousDays(_newPrice)
+			self.prePrice = self.price 	#float是不可变类型，每一次都是深度赋值
+			#使用新价格
 			self.price = _newPrice
 			#判断是否涨停或跌停
 			#注意浮点数比较相等
