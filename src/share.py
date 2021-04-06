@@ -45,6 +45,7 @@ class shareClass:
 		return msg
 
 	def getCoolingValue(self):
+		#print(self.monotonousDays)
 		return COOLING_VALUE_MOLE / self.monotonousDays
 
 	def getUpperLimit(self):
@@ -70,9 +71,9 @@ class shareClass:
 			self.monotonousDays += 1
 		elif self.price < self.prePrice and _newPrice < self.price:
 			#持续下跌
-			self.monotonousDays -= 1
+			self.monotonousDays += 1
 		else:
-			#否则，重置天数
+			#否则，出现反复，重置天数
 			self.monotonousDays = 1
 
 	#_flag用于忽视涨跌停规则，用于初始化股票时
