@@ -32,8 +32,8 @@ INIT_TRANS_DAYS = 20 #初始化天数
 LAST_YEARS = 20	# 持续调查20年
 USERS_NUM = 500	#参与账户数量
 SHARES_NUM = 50	#参与的股票数量
-DAYS_IN_1_YEAR = 48	#239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = list(range(4, 49, 4))#[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -72,11 +72,12 @@ class mirror:
 			shareInfoDict[shareId].append(sharePrice)
 		#记录股票总数
 		for value in shareNumberSheet["value_row"].values():
-			shareId = int(value["股票代码"])
-			shareNum = int(value["初始股数"])
-			if self.initFund == 0:
-				self.initFund = int(value["初始资金"])
-			shareInfoDict[shareId].append(shareNum)
+			if value:
+				shareId = int(value["股票代码"])
+				shareNum = int(value["初始股数"])
+				if self.initFund == 0:
+					self.initFund = int(value["初始资金"])
+				shareInfoDict[shareId].append(shareNum)
 		#初始化交易概率
 		for valueDict in purchaseProbSheet["value_row"].values():
 			shareId = list(valueDict.values())[0]
@@ -85,11 +86,12 @@ class mirror:
 		#现在初始化股票
 		sharesList = list()
 		for key, value in shareInfoDict.items():
-			shareId = key
-			sharePrice = value[0]
-			shareNumber = value[1]
-			sharePurcProbList = value[2]
-			sharesList.append(sc(sharePrice, shareNumber, sharePurcProbList, shareId))
+			if value != [None]:
+				shareId = key
+				sharePrice = value[0]
+				shareNumber = value[1]
+				sharePurcProbList = value[2]
+				sharesList.append(sc(sharePrice, shareNumber, sharePurcProbList, shareId))
 		'''
 		for obj in sharesList:
 			print(obj)
@@ -278,8 +280,16 @@ class mirror:
 							continue
 				#根据交易记录调整价格
 				#print("调整价格")
+				#调整单调天数
 				for share in self.sharesList:
 					share.dailyInit()
+				'''
+				for share in self.sharesList:
+					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,当前冷却因子-%.2f" % (share.getShareId(), share.prePrice, share.price, share.getCoolingValue()))
+				'''
+				#记录当天收盘价
+				for share in self.sharesList:
+					share.setPrePrice()
 				'''
 				for index, share in enumerate(self.sharesList):
 					#如果达到涨跌停值，那么第二天开盘价格就是这个涨跌停值
@@ -301,7 +311,7 @@ class mirror:
 				nowDay += 1
 			#一年结束
 			#记录本年数据
-			dict2Excel(nowYear, infoDict)
+			dict2Excel(nowYear, infoDict, SHARES_NUM, "月份/股票")
 			nowYear += 1
 			nowDay = 1
 			nowMonth = 1

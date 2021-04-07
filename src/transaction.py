@@ -7,6 +7,7 @@ python version: 3.7
 '''
 
 import math
+from dict2Excel import *
 
 class transactionClass:
 	def __init__(self, _shareNum):
@@ -17,6 +18,17 @@ class transactionClass:
 		self.todayTransactionList = [0] * _shareNum
 		self.totalTransactionNum = [0] * _shareNum #记录每只股票的总交易量
 		self.shareNum = _shareNum
+		self.todayPriceList = [0.0] * _shareNum
+
+	def setSharePrice(self, _index, _price):
+		self.todayPriceList[_index] = _price
+
+	def outputTodayPrice(self, _year, _month, _day):
+		tempDict = dict()
+		tempDict[1] = self.todayPriceList
+		dict2ExcelPriceRecord(_year, _month, _day, tempDict, self.shareNum, "收盘价/股票")
+		self.todayPriceList = [0.0] * _shareNum
+
 
 	#新的一天来到
 	def newDayComes(self):

@@ -43,7 +43,15 @@ def getNormalListBias(_low, _high, _loc, _bias, _coolingValue):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
 	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
+	'''
+	if not math.isclose(_coolingValue, 1.0):
+		print("原始损益-%.2f" % _bias, end = " ")
+	'''
 	_bias = 1 + (_bias - 1) * _coolingValue
+	'''
+	if not math.isclose(_coolingValue, 1.0):
+		print("实际损益-%.2f, 冷却因子-%.2f" % (_bias, _coolingValue))
+	'''
 	meanValue = _loc * _bias
 	#print(_low, _high, _loc, _bias)
 	if meanValue > _high:
@@ -139,6 +147,10 @@ def doTransaction(_accountsList, \
 	price = _sharesList[_shareIndex].getPrice()
 	#获得持续增长/跌幅的天数的冷却值
 	coolingValue = _sharesList[_shareIndex].getCoolingValue()
+	'''
+	if _flag == 1:
+		print(coolingValue, "*****")
+	'''
 	#然后买方卖方出价
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
@@ -160,7 +172,8 @@ def doTransaction(_accountsList, \
 			_accountsList[_user1Index].buyShares(num, user1Price, _shareIndex)  
 			_accountsList[_user2Index].sellShares(num, user1Price, _shareIndex)
 			#最后调整价格
-			_sharesList[_shareIndex].setPrice(user1Price, _flag)
+			if _flag:
+				_sharesList[_shareIndex].setPrice(user1Price, _flag)
 			#然后记录交易
 			'''
 			if _flag == 1:
@@ -181,7 +194,8 @@ def doTransaction(_accountsList, \
 			'''
 			_transactionRecord.newTransactionComes(_shareIndex, roundSum)
 			#最后调整价格
-			_sharesList[_shareIndex].setPrice(user1Price, _flag)
+			if _flag:
+				_sharesList[_shareIndex].setPrice(user1Price, _flag)
 			return
 	else:
 		#否则直接不做什么，返回
@@ -210,19 +224,23 @@ if __name__ == "__main__":
 	lowerLimit = 12.27 * 0.9
 	bigCount = 0
 	smallCount = 0
-	for i in range(100000):
-		print("\r%d" % i, end = " ")
-		price = getPrice(lowerLimit, upperLimit, a, 0.9, 1/2)
-		if price[0] > a:
-			bigCount += 1
-		else:
-			smallCount += 1
-		if math.isclose(price[0], upperLimit):
-			print(price[0], "涨停")
-		elif math.isclose(price[0], lowerLimit):
-			print(price[0], "跌停")
-		else:
-			continue
-	etime = time.time()
-	print(etime - stime)
-	print(bigCount, smallCount)
+	for j in range(1, 11):
+		for i in range(100000):
+			print("\r%d" % i, end = " ")
+			price = getPrice(lowerLimit, upperLimit, a, 1.1, 1 / j)
+			if price[0] > a:
+				bigCount += 1
+			else:
+				smallCount += 1
+			if math.isclose(price[0], upperLimit):
+				print(price[0], "涨停")
+			elif math.isclose(price[0], lowerLimit):
+				print(price[0], "跌停")
+			else:
+				continue
+		etime = time.time()
+		print(etime - stime)
+		print(bigCount, smallCount)
+		print("*" * 30)
+		bigCount = 0
+		smallCount = 0
