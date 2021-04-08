@@ -11,6 +11,6 @@ LOWER_LIMIT = 0.9 #跌停
 DATA_PATH = "..\\data\\dataForExp.xlsx"
 INIT_PRICE = "initPrice1"	#初始价格表名
 PURCHASE_PROB = "purchaseProb2"	#购买概率表名
-SHARE_NUMBER = "initFund1"	#初始股票数量
+SHARE_NUMBER = "initFund2"	#初始股票数量
 MIN_BUY_QUA = 100	#最小买入数量
 LOSS_VALUE = 1e-10	#适当损失，用于在归一化时进一步收窄，避免触发涨跌停
