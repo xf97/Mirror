@@ -32,6 +32,7 @@ class shareClass:
 		self.shareId = _id	#股票ID
 		self.monotonousDays = 1	#单调递增或递减的天数
 		self.monotonousFlag = 0	#当天相对于前一天是增是减
+		self.period = 2 * math.pi / 12
 
 	#打印对象使用
 	def __str__(self):
@@ -51,7 +52,7 @@ class shareClass:
 
 	def getCoolingValue(self):
 		#print(self.monotonousDays)
-		return math.cos(self.monotonousDays - 1)
+		return math.cos(self.period * (self.monotonousDays - 1))
 
 	def getUpperLimit(self):
 		return self.price * UPPER_LIMIT

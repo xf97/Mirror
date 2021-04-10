@@ -19,6 +19,7 @@ class transactionClass:
 		self.totalTransactionNum = [0] * _shareNum #记录每只股票的总交易量
 		self.shareNum = _shareNum
 		self.todayPriceList = [0.0] * _shareNum
+		self.handCount = [0] * _shareNum 	#记录每只股票昨天被买卖了多少笔
 
 	def setSharePrice(self, _index, _price):
 		self.todayPriceList[_index] = _price
@@ -29,17 +30,21 @@ class transactionClass:
 		dict2ExcelPriceRecord(_year, _month, _day, tempDict, self.shareNum, "收盘价/股票")
 		self.todayPriceList = [0.0] * _shareNum
 
+	def getHandCount(self, _shareIndex):
+		return self.handCount[_shareIndex]
 
 	#新的一天来到
 	def newDayComes(self):
 		#深度复制
 		self.yesterdayTransactionList = self.todayTransactionList[:]	
 		self.todayTransactionList = [0] * self.shareNum
+		self.handCount = [0] * self.shareNum
 
 	#设置新的一笔交易量，以加等于的形式
 	def newTransactionComes(self, _shareIndex, _transNum):
 		self.todayTransactionList[_shareIndex] += _transNum
 		self.totalTransactionNum[_shareIndex] += _transNum 
+		self.handCount[_shareIndex] += 1
 
 	#获得昨天的一只股票的交易量
 	def getYesterdayTransNum(self, _shareIndex):
@@ -76,7 +81,8 @@ class transactionClass:
 	def clear(self):
 		self.yesterdayTransactionList = [0] * self.shareNum
 		self.todayTransactionList = [0] * self.shareNum
-		self.totalTransactionNum = [0] * self.shareNum #记录每只股票的总交易量		
+		self.totalTransactionNum = [0] * self.shareNum #记录每只股票的总交易量
+		self.handCount = [0] * self.shareNum		
 
 #单元测试
 if __name__ == "__main__":

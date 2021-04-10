@@ -205,11 +205,6 @@ class mirror:
 		nowYear = 1	#当前年份
 		nowDay = 1	#当前天数
 		nowMonth = 1	#当前月份
-		#重置价格上下限
-		for share in self.sharesList:
-			share.dailyInit()
-			print(share.getPrice())
-		print("以上是初始价格")
 		#信息记录字典
 		infoDict = dict()	#键是月份，值是当月所有股票的收盘价，每年重置一次
 		while nowYear <= 1:
@@ -233,9 +228,9 @@ class mirror:
 						relativeVolumeList[index] = (thisShareNum) / aveShareNum
 					#然后对相对成交量进行一个归一化处理
 					#不在原值上修改，要保留变量
-					print(relativeVolumeList)
+					#print(relativeVolumeList)
 					normalizationVolume = normalization(relativeVolumeList, BIAS_UPPER_LIMIT, BIAS_LOWER_LIMIT)
-				print(normalizationVolume)
+				#print(normalizationVolume)
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):
 					#对于每位用户					
@@ -286,8 +281,8 @@ class mirror:
 				#调整单调天数
 				for share in self.sharesList:
 					share.dailyInit()
-				for share in self.sharesList:
-					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,当前冷却因子-%.2f" % (share.getShareId(), share.prePrice, share.price, share.getCoolingValue()))
+				for index, share in enumerate(self.sharesList):
+					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子-%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue()))
 				#记录当天收盘价
 				for share in self.sharesList:
 					share.setPrePrice()
