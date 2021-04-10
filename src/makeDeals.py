@@ -12,7 +12,7 @@ __author__ = "xiaofeng"
 #偏移值，用于包含随机数上限
 STAND_BIAS = 1e-8
 #标准差，要改成动态值
-SIGMA = 0.5
+SIGMA = 0.1
 #最小整笔交易数
 LEAST_NUM = 100
 #正态分布数组长度
@@ -39,43 +39,23 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
-def getNormalListBias(_low, _high, _loc, _bias, _coolingValue):
+def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _flag):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
 	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
-	'''
-	if not math.isclose(_coolingValue, 1.0):
-		print("原始损益-%.2f" % _bias, end = " ")
-	'''
 	_bias = 1 + (_bias - 1) * _coolingValue
-	'''
-	if not math.isclose(_coolingValue, 1.0):
-		print("实际损益-%.2f, 冷却因子-%.2f" % (_bias, _coolingValue))
-	'''
-	meanValue = _loc * _bias
-	#print(_low, _high, _loc, _bias)
+	meanValue = _loc * 1
 	if meanValue > _high:
 		meanValue = _high
 	if meanValue < _low:
 		meanValue = _low
-	'''
-	if meanValue > _loc:
-		meanValue -= LOSS_VALUE
-	elif meanValue < _loc:
-		meanValue += LOSS_VALUE
-	'''
-	#print(meanValue)
-	sigma = meanValue * 0.2 / 6
-	if _bias != 1.0:
-		print(_bias, "****")
-	normalList = numpy.random.normal(loc = meanValue, scale = sigma, size = 2000)
-	#intervalList = [i for i in normalList if i >= _low and i <= _high]
-	#print(len(normalList))
+	#sigma = meanValue * 0.2 / 6
+	#sigma = sigma if sigma < SIGMA else SIGMA
+	sigma = 0.05
+	normalList = numpy.random.normal(loc = meanValue, scale = sigma, size = 1500)
 	intervalList = normalList[numpy.where(normalList >= _low)]
-	#print(len(intervalList))
 	intervalList = intervalList[numpy.where(intervalList <= _high)]
 	#添加涨跌值
-	#intervalList = numpy.append(intervalList, [_low, _high])
 	return intervalList
 
 def getNormalList(_low, _high, _loc):
@@ -85,55 +65,40 @@ def getNormalList(_low, _high, _loc):
 	intervalList = normalList[numpy.where(normalList >= _low)]
 	intervalList = intervalList[numpy.where(intervalList <= _high)]
 	#添加涨跌值
-	#intervalList = numpy.append(intervalList, [_low, _high])
 	return intervalList
 
 def getPrice(_low, _high, _price, _bias, _coolingValue):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
 	#生成符合正态分布的数列
 	#要抑制偏移的幅度
-	#_bias /= 3
-	#正常情况下，_bias是0.9-1.1之间的数字
 	_bias = 1
-	priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue)
+	priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, 1)
 	count = 0
 	while len(priceList) == 0:
-		#print("\r计算正态分布中...", end = "")
 		count += 1
-		priceList = getNormalListBias(_low, _high, _price, _bias)
+		priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, 1)
 		if count >= 10000:
-			print("%.2f %.2f %.2f %.1f" % (_low, _high, _price, _bias))
 			while len(priceList) <= 100:
 				tempNum = random.uniform(_low, _high + LOSS_VALUE)
 				if tempNum >= _high:
 					tempNum = _high
 				priceList = numpy.append(priceList, tempNum)
-	#print("\n%d" % count)
-	#提取价格
-	#print(len(priceList), "****")
 	price1 = numpy.random.choice(priceList)
-	price2 = numpy.random.choice(priceList)
+	priceList1 = getNormalListBias(_low, _high, price1, _bias, _coolingValue, 0)
+	count = 0
+	while len(priceList1) == 0:
+		#print("\r计算正态分布中...", end = "")
+		count += 1
+		priceList1 = getNormalListBias(_low, _high, _price, _bias, _coolingValue, 0)
+		if count >= 10000:
+			while len(priceList) <= 100:
+				tempNum = random.uniform(_low, _high + LOSS_VALUE)
+				if tempNum >= _high:
+					tempNum = _high
+				priceList1 = numpy.append(priceList1, tempNum)
+	price2 = numpy.random.choice(priceList1)
 	#判断价格边界，已经符合价格边界
 	return price1, price2
-	'''
-	normalObj = st.truncnorm(lowerLimit, upperLimit, loc = _price, scale = SIGMA)
-	#为有足够的挑选范围，生成长度为10000的数组
-	normalList = list(normalObj.rvs(NORMAL_LIST_LENGTH))
-	#排序
-	normalList.sort()
-	#然后随机挑选
-	price1 = normalList[random.randint(0, NORMAL_LIST_LENGTH - 1)]
-	if price1 > _high:
-		price1 = _high
-	elif price1 < _low:
-		price1 = _low
-	price2 = normalList[random.randint(0, NORMAL_LIST_LENGTH - 1)]
-	if price2 > _high:
-		price2 = _high
-	elif price2 < _low:
-		price2 = _low
-	return price1, price2
-	'''
 
 '''
 注意，好像没有更新出价范围--要根据交易调整实时调整出价范围
@@ -213,42 +178,23 @@ if __name__ == "__main__":
 	a = 20
 	upperLimit = a * 1.1
 	lowerLimit = a * 0.9
-	middleCount = 0
-	properCount = 0
-	aList = getNormalListBias(lowerLimit, upperLimit, a, 1, 1)
-	for i in aList:
-		if i >= (a - (a * 0.2 / 6)) and i <= (a + (a * 0.2 / 6)):
-			middleCount += 1
-		if i >= a - 1 and i <= a + 1:
-			properCount += 1
-		else:
-			continue
-	print(middleCount / len(aList))
-	print(properCount / len(aList))
-	'''
-	stime = time.time()
 	bigCount = 0
 	smallCount = 0
-	middleCount = 0
-	#for j in range(1, 11):
 	for i in range(100000):
-		print("\r%d" % i, end = " ")
-		price = getPrice(lowerLimit, upperLimit, a, 1, 1)
-		if price[0] >= (a - (a * 0.2 / 6)) and price[0] <= (a + (a * 0.2 / 6)):
-			middleCount += 1
-		if price[0] < a:
+		print("\r%d" % (i + 1), end = "")
+		price1, price2 = getPrice(lowerLimit, upperLimit, a, 1, 1)
+		'''
+		if price1 > a:
+			bigCount += 1
+		else:
 			smallCount += 1
-		if price[0] > a:
-			bigCount += 1																														
-		if math.isclose(price[0], upperLimit):
-			print(price[0], "涨停")
-		elif math.isclose(price[0], lowerLimit):
-			print(price[0], "跌停")
+		'''
+		if price1 > price2:
+			if price1 > a:
+				bigCount += 1
+			else:
+				smallCount += 1
 		else:
 			continue
-	etime = time.time()
-	print(etime - stime)
+	print()
 	print(bigCount, smallCount)
-	print("*" * 30)
-	print(middleCount / 100000)
-	'''
