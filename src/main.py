@@ -233,9 +233,9 @@ class mirror:
 						relativeVolumeList[index] = (thisShareNum) / aveShareNum
 					#然后对相对成交量进行一个归一化处理
 					#不在原值上修改，要保留变量
-					print(relativeVolumeList)
+					#print(relativeVolumeList)
 					normalizationVolume = normalization(relativeVolumeList, UPPER_LIMIT, LOWER_LIMIT)
-				print(normalizationVolume)
+				#print(normalizationVolume)
 				#print(normalizationVolume)
 				#对于每一个账户
 				for userIndex in range(len(self.accountsList)):

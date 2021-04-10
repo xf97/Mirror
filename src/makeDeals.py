@@ -66,6 +66,8 @@ def getNormalListBias(_low, _high, _loc, _bias, _coolingValue):
 	'''
 	#print(meanValue)
 	sigma = meanValue * 0.2 / 6
+	if _bias != 1.0:
+		print(_bias, "****")
 	normalList = numpy.random.normal(loc = meanValue, scale = sigma, size = 2000)
 	#intervalList = [i for i in normalList if i >= _low and i <= _high]
 	#print(len(normalList))
@@ -90,7 +92,9 @@ def getPrice(_low, _high, _price, _bias, _coolingValue):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
 	#生成符合正态分布的数列
 	#要抑制偏移的幅度
-	_bias /= 5
+	#_bias /= 3
+	#正常情况下，_bias是0.9-1.1之间的数字
+	_bias = 1
 	priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue)
 	count = 0
 	while len(priceList) == 0:
@@ -206,25 +210,23 @@ def doTransaction(_accountsList, \
 
 
 if __name__ == "__main__":
-	#price = 42.67
-	#for _ in range(100000):
-	'''
-	a = getNormalListBias(price * 0.9, price * 1.1, price, 1.1)
-	bigCount = 0
-	smallCount = 0
-	for i in a:
-		if i > price:
-			bigCount += 1
-		elif i < price:
-			smallCount += 1
-	print(bigCount, smallCount)
-	#print(len(a))
-	#print("***" * 20)
+	a = 20
+	upperLimit = a * 1.1
+	lowerLimit = a * 0.9
+	middleCount = 0
+	properCount = 0
+	aList = getNormalListBias(lowerLimit, upperLimit, a, 1, 1)
+	for i in aList:
+		if i >= (a - (a * 0.2 / 6)) and i <= (a + (a * 0.2 / 6)):
+			middleCount += 1
+		if i >= a - 1 and i <= a + 1:
+			properCount += 1
+		else:
+			continue
+	print(middleCount / len(aList))
+	print(properCount / len(aList))
 	'''
 	stime = time.time()
-	a = 12.27
-	upperLimit = 12.27 * 1.1
-	lowerLimit = 12.27 * 0.9
 	bigCount = 0
 	smallCount = 0
 	middleCount = 0
@@ -249,3 +251,4 @@ if __name__ == "__main__":
 	print(bigCount, smallCount)
 	print("*" * 30)
 	print(middleCount / 100000)
+	'''
