@@ -12,7 +12,7 @@ __author__ = "xiaofeng"
 #偏移值，用于包含随机数上限
 STAND_BIAS = 1e-8
 #标准差，要改成动态值
-SIGMA = 0.1
+SIGMA = 0.05
 #最小整笔交易数
 LEAST_NUM = 100
 #正态分布数组长度
@@ -39,19 +39,18 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
-def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _flag):
+def getNormalListBias(_low, _high, _loc, _bias, _coolingValue):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
 	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
-	_bias = 1 + (_bias - 1) * _coolingValue
-	meanValue = _loc * 1
+	_bias = _bias * _coolingValue
+	sigma = _loc * 0.2 / 6
+	sigma = sigma if sigma < SIGMA else SIGMA
+	meanValue = _loc + _bias * sigma
 	if meanValue > _high:
 		meanValue = _high
 	if meanValue < _low:
 		meanValue = _low
-	#sigma = meanValue * 0.2 / 6
-	#sigma = sigma if sigma < SIGMA else SIGMA
-	sigma = 0.05
 	normalList = numpy.random.normal(loc = meanValue, scale = sigma, size = 1500)
 	intervalList = normalList[numpy.where(normalList >= _low)]
 	intervalList = intervalList[numpy.where(intervalList <= _high)]
@@ -72,11 +71,11 @@ def getPrice(_low, _high, _price, _bias, _coolingValue):
 	#生成符合正态分布的数列
 	#要抑制偏移的幅度
 	_bias = 1
-	priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, 1)
+	priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue)
 	count = 0
 	while len(priceList) == 0:
 		count += 1
-		priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, 1)
+		priceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue)
 		if count >= 10000:
 			while len(priceList) <= 100:
 				tempNum = random.uniform(_low, _high + LOSS_VALUE)
@@ -84,12 +83,12 @@ def getPrice(_low, _high, _price, _bias, _coolingValue):
 					tempNum = _high
 				priceList = numpy.append(priceList, tempNum)
 	price1 = numpy.random.choice(priceList)
-	priceList1 = getNormalListBias(_low, _high, price1, _bias, _coolingValue, 0)
+	priceList1 = getNormalListBias(_low, _high, price1, _bias, _coolingValue)
 	count = 0
 	while len(priceList1) == 0:
 		#print("\r计算正态分布中...", end = "")
 		count += 1
-		priceList1 = getNormalListBias(_low, _high, _price, _bias, _coolingValue, 0)
+		priceList1 = getNormalListBias(_low, _high, _price, _bias, _coolingValue)
 		if count >= 10000:
 			while len(priceList) <= 100:
 				tempNum = random.uniform(_low, _high + LOSS_VALUE)

@@ -51,7 +51,7 @@ class shareClass:
 
 	def getCoolingValue(self):
 		#print(self.monotonousDays)
-		return COOLING_VALUE_MOLE / self.monotonousDays
+		return math.cos(self.monotonousDays - 1)
 
 	def getUpperLimit(self):
 		return self.price * UPPER_LIMIT

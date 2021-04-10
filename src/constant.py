@@ -8,6 +8,8 @@
 SELL_PROB = 0.5	#卖出概率
 UPPER_LIMIT = 1.1 #涨停
 LOWER_LIMIT = 0.9 #跌停
+BIAS_UPPER_LIMIT = 1.0	#偏移上限值
+BIAS_LOWER_LIMIT = -1.0	#偏移下限值
 DATA_PATH = "..\\data\\dataForExp.xlsx"
 INIT_PRICE = "initPrice1"	#初始价格表名
 PURCHASE_PROB = "purchaseProb2"	#购买概率表名
