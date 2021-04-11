@@ -33,6 +33,7 @@ class shareClass:
 		self.monotonousDays = 1	#单调递增或递减的天数
 		self.monotonousFlag = 0	#当天相对于前一天是增是减
 		self.period = 2 * math.pi / (ONE_FOURTH_PERIOD * 4)
+		self.newYearPrice = 1
 
 	#打印对象使用
 	def __str__(self):
@@ -46,13 +47,27 @@ class shareClass:
 		msg += "\n"
 		return msg
 
+	def setNewYearPrice(self, _price):
+		self.newYearPrice = _price
+
+	def getNewYearPrice(self):
+		return self.newYearPrice
+
 	def setPrePrice(self):
 		#将当天收盘价记为前价格
 		self.prePrice = self.price
 
-	def getCoolingValue(self):
+	def getCoolingValue(self, _price):
 		#print(self.monotonousDays)
-		return math.cos(self.period * (self.monotonousDays - 1))
+		#先计算差距，涨幅或者是跌幅
+		diff = abs(_price - self.newYearPrice) / self.newYearPrice
+		if diff == 0:
+			return 1
+		else:
+			if diff > 0.2:
+				diff = 0.2
+			coolingValue = (-1) * math.cos(self.period * diff)
+			return coolingValue
 
 	def getUpperLimit(self):
 		return self.price * UPPER_LIMIT

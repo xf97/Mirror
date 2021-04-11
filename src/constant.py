@@ -16,4 +16,4 @@ PURCHASE_PROB = "purchaseProb2"	#购买概率表名
 SHARE_NUMBER = "initFund2"	#初始股票数量
 MIN_BUY_QUA = 100	#最小买入数量
 LOSS_VALUE = 1e-10	#适当损失，用于在归一化时进一步收窄，避免触发涨跌停
-ONE_FOURTH_PERIOD = 5	#允许连续增长或下跌的周期，超过该值则冷却值变号
+ONE_FOURTH_PERIOD = 0.1	#允许连续增长或下跌的周期（价格增长或降幅），超过该值则冷却值变号

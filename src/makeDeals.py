@@ -46,7 +46,7 @@ def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _handCountValue):
 	_bias = _bias * _coolingValue * _handCountValue
 	sigma = _loc * 0.2 / 6
 	sigma = sigma if sigma < SIGMA else SIGMA
-	meanValue = _loc + _bias * sigma
+	meanValue = _loc + _bias * sigma * 0.5
 	if meanValue > _high:
 		meanValue = _high
 	if meanValue < _low:
@@ -123,7 +123,7 @@ def doTransaction(_accountsList, \
 	lowLimit, highLimit = _sharesList[_shareIndex].getLimitRange()
 	price = _sharesList[_shareIndex].getPrice()
 	#获得持续增长/跌幅的天数的冷却值
-	coolingValue = _sharesList[_shareIndex].getCoolingValue()
+	coolingValue = _sharesList[_shareIndex].getCoolingValue(price)
 	#减弱因为交易笔数多而产生的影响
 	handCountValue = getHandCountValue(_transactionRecord.getHandCount(_shareIndex))
 	'''

@@ -32,8 +32,8 @@ INIT_TRANS_DAYS = 20 #初始化天数
 LAST_YEARS = 20	# 持续调查20年
 USERS_NUM = 100	#参与账户数量
 SHARES_NUM = 10	#参与的股票数量
-DAYS_IN_1_YEAR = 48 #239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = list(range(4, 49, 4)) #[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -207,7 +207,10 @@ class mirror:
 		nowMonth = 1	#当前月份
 		#信息记录字典
 		infoDict = dict()	#键是月份，值是当月所有股票的收盘价，每年重置一次
-		while nowYear <= 1:
+		while nowYear <= 2:
+			#每年开始，先记录当年的初始价格
+			for share in self.sharesList:
+				share.setNewYearPrice(share.getPrice())
 			#模拟二十年的
 			#print("*" * 20, str(nowYear) + " ", str(nowMonth) + " ", str(nowDay), "*" * 20)
 			while nowDay <= DAYS_IN_1_YEAR:
@@ -282,7 +285,7 @@ class mirror:
 				for share in self.sharesList:
 					share.dailyInit()
 				for index, share in enumerate(self.sharesList):
-					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子%.2f,当前偏移值%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue(), normalizationVolume[index]))
+					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子%.2f,当前偏移值%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue(share.price), normalizationVolume[index]))
 				#记录当天收盘价
 				for share in self.sharesList:
 					share.setPrePrice()
