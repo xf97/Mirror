@@ -32,7 +32,7 @@ class shareClass:
 		self.shareId = _id	#股票ID
 		self.monotonousDays = 1	#单调递增或递减的天数
 		self.monotonousFlag = 0	#当天相对于前一天是增是减
-		self.period = 2 * math.pi / 12
+		self.period = 2 * math.pi / (ONE_FOURTH_PERIOD * 4)
 
 	#打印对象使用
 	def __str__(self):
@@ -75,20 +75,29 @@ class shareClass:
 			self.monotonousFlag = 1	#初始增加标志
 		elif self.price > self.prePrice:
 			if self.monotonousFlag == 1:
-				#前一天收盘价也大于大前天收盘价，持续增加
-				self.monotonousDays += 1
+				#如果超过上限，就不改变值
+				if self.monotonousDays > (ONE_FOURTH_PERIOD >> 1):
+					pass
+				else:
+					#前一天收盘价也大于大前天收盘价，持续增加
+					self.monotonousDays += 1
 			else:
 				#前一天收盘价小于大前天收盘价，重置
-				self.monotonousDays = 1	#先不重置，而是折半
+				self.monotonousDays >>= 1	#先不重置，而是折半
 				if self.monotonousDays == 0:
 					self.monotonousDays = 1
 				self.monotonousFlag = 1
 		elif self.price < self.prePrice:
 			if self.monotonousFlag == 0:
 				#持续下跌
-				self.monotonousDays += 1
+				#如果超过上限，就不改变值
+				if self.monotonousDays > (ONE_FOURTH_PERIOD >> 1):
+					pass
+				else:
+					#前一天收盘价也小于大前天收盘价，持续增加
+					self.monotonousDays += 1
 			else:
-				self.monotonousDays = 1	#先不重置，而是折半
+				self.monotonousDays >>= 1	#先不重置，而是折半
 				if self.monotonousDays == 0:
 					self.monotonousDays = 1
 				self.monotonousFlag = 0

@@ -282,7 +282,7 @@ class mirror:
 				for share in self.sharesList:
 					share.dailyInit()
 				for index, share in enumerate(self.sharesList):
-					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子-%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue()))
+					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子%.2f,当前偏移值%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue(), normalizationVolume[index]))
 				#记录当天收盘价
 				for share in self.sharesList:
 					share.setPrePrice()

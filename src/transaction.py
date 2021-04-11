@@ -8,6 +8,7 @@ python version: 3.7
 
 import math
 from dict2Excel import *
+from constant import *
 
 class transactionClass:
 	def __init__(self, _shareNum):
