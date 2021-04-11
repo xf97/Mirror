@@ -79,7 +79,7 @@ class shareClass:
 				self.monotonousDays += 1
 			else:
 				#前一天收盘价小于大前天收盘价，重置
-				self.monotonousDays >>= 1	#先不重置，而是折半
+				self.monotonousDays = 1	#先不重置，而是折半
 				if self.monotonousDays == 0:
 					self.monotonousDays = 1
 				self.monotonousFlag = 1
@@ -88,7 +88,7 @@ class shareClass:
 				#持续下跌
 				self.monotonousDays += 1
 			else:
-				self.monotonousDays >>= 1	#先不重置，而是折半
+				self.monotonousDays = 1	#先不重置，而是折半
 				if self.monotonousDays == 0:
 					self.monotonousDays = 1
 				self.monotonousFlag = 0

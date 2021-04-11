@@ -99,7 +99,7 @@ def getPrice(_low, _high, _price, _bias, _coolingValue, _handCountValue):
 	return price1, price2
 
 def getHandCountValue(_handCount):
-	value = _handCount ** 0.5
+	value = _handCount #** 0.5
 	if value == 0:
 		return 1
 	else:
