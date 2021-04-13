@@ -15,9 +15,9 @@ class transactionClass:
 		#因交易数据尚不明确, 此类暂不明确
 		#存储每只股当天和前一天的交易量
 		#print(_shareNum, type(_shareNum))
-		self.yesterdayTransactionList = [0] * _shareNum
-		self.todayTransactionList = [0] * _shareNum
-		self.totalTransactionNum = [0] * _shareNum #记录每只股票的总交易量
+		self.yesterdayTransactionList = [0.0] * _shareNum
+		self.todayTransactionList = [0.0] * _shareNum
+		self.totalTransactionNum = [0.0] * _shareNum #记录每只股票的总交易量
 		self.shareNum = _shareNum
 		self.todayPriceList = [0.0] * _shareNum
 		self.handCount = [0] * _shareNum 	#记录每只股票昨天被买卖了多少笔
@@ -80,10 +80,10 @@ class transactionClass:
 
 	#清空数据
 	def clear(self):
-		self.yesterdayTransactionList = [0] * self.shareNum
-		self.todayTransactionList = [0] * self.shareNum
-		self.totalTransactionNum = [0] * self.shareNum #记录每只股票的总交易量
-		self.handCount = [0] * self.shareNum		
+		self.yesterdayTransactionList = [0.0] * self.shareNum
+		self.todayTransactionList = [0.0] * self.shareNum
+		self.totalTransactionNum = [0.0] * self.shareNum #记录每只股票的总交易量
+		self.handCount = [0.0] * self.shareNum		
 
 #单元测试
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _handCountValue):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
 	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
-	_bias = _bias * _coolingValue #* _handCountValue
+	_bias = _bias * _coolingValue * _handCountValue
 	sigma = _loc * 0.2 / 6
 	sigma = sigma if sigma < SIGMA else SIGMA
 	meanValue = _loc + _bias * sigma
@@ -158,7 +158,7 @@ def doTransaction(_accountsList, \
 			if _flag == 1:
 				print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，买方出价-%.2f，卖方出价-%.2f, 交易价格-%.2f，该只股票出价范围-[%.2f, %.2f, %.2f，%.2f, %.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, num, user1Price, user2Price, user1Price, _sharesList[_shareIndex].getLimitRange()[0], _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getPrice(), _sharesList[_shareIndex].getBidRange()[1], _sharesList[_shareIndex].getLimitRange()[1]))
 			'''
-			_transactionRecord.newTransactionComes(_shareIndex, num)
+			_transactionRecord.newTransactionComes(_shareIndex, num * user1Price)
 			return
 		else:	
 			#买随机的整股数
@@ -171,7 +171,7 @@ def doTransaction(_accountsList, \
 			if _flag == 1:
 				print("发生交易: 账户%d从账户%d买入第%d只股票交易%d股，买方出价-%.2f，卖方出价-%.2f, 交易价格-%.2f，该只股票出价范围-[%.2f, %.2f, %.2f，%.2f, %.2f]:" % (_user1Index + 1, _user2Index + 1, _shareIndex + 1, roundSum, user1Price, user2Price, user1Price, _sharesList[_shareIndex].getLimitRange()[0], _sharesList[_shareIndex].getBidRange()[0], _sharesList[_shareIndex].getPrice(), _sharesList[_shareIndex].getBidRange()[1], _sharesList[_shareIndex].getLimitRange()[1]))
 			'''
-			_transactionRecord.newTransactionComes(_shareIndex, roundSum)
+			_transactionRecord.newTransactionComes(_shareIndex, roundSum * user1Price)
 			#最后调整价格
 			if _flag:
 				_sharesList[_shareIndex].setPrice(user1Price, _flag)

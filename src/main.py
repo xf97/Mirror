@@ -28,10 +28,10 @@ from excel2Dict import ExcelToDict
 from dict2Excel import *
 
 #常量部分
-INIT_TRANS_DAYS = 100 #初始化天数 
+INIT_TRANS_DAYS = 20 #初始化天数 
 LAST_YEARS = 19	# 持续调查20年
-USERS_NUM = 500	#参与账户数量
-SHARES_NUM = 50	#参与的股票数量
+USERS_NUM = 100	#参与账户数量
+SHARES_NUM = 10	#参与的股票数量
 DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
 DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
@@ -221,7 +221,7 @@ class mirror:
 				aveShareNum = self.transactionRecord.getYesterdayAveTransNum()
 				if math.isclose(aveShareNum, 1):
 					#第一天，昨日无成交
-					normalizationVolume = [1.0] * len(self.sharesList)	#就在原值进行改动
+					normalizationVolume = [0.0] * len(self.sharesList)	#就在原值进行改动
 				else: 
 					relativeVolumeList = [0.0] * len(self.sharesList)
 					for index, share in enumerate(self.sharesList):
