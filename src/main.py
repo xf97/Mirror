@@ -28,12 +28,12 @@ from excel2Dict import ExcelToDict
 from dict2Excel import *
 
 #常量部分
-INIT_TRANS_DAYS = 20 #初始化天数 
-LAST_YEARS = 20	# 持续调查20年
-USERS_NUM = 100	#参与账户数量
-SHARES_NUM = 10	#参与的股票数量
-DAYS_IN_1_YEAR = 48 #239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = list(range(4, 49, 4))#[19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+INIT_TRANS_DAYS = 100 #初始化天数 
+LAST_YEARS = 19	# 持续调查20年
+USERS_NUM = 500	#参与账户数量
+SHARES_NUM = 50	#参与的股票数量
+DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
+DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -207,7 +207,7 @@ class mirror:
 		nowMonth = 1	#当前月份
 		#信息记录字典
 		infoDict = dict()	#键是月份，值是当月所有股票的收盘价，每年重置一次
-		while nowYear <= 2:
+		while nowYear <= LAST_YEARS:
 			#每年开始，先记录当年的初始价格
 			for share in self.sharesList:
 				share.setNewYearPrice(share.getPrice())

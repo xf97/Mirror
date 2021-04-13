@@ -46,7 +46,7 @@ def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _handCountValue):
 	_bias = _bias * _coolingValue #* _handCountValue
 	sigma = _loc * 0.2 / 6
 	sigma = sigma if sigma < SIGMA else SIGMA
-	meanValue = _loc + _bias * sigma * 0.5
+	meanValue = _loc + _bias * sigma
 	if meanValue > _high:
 		meanValue = _high
 	if meanValue < _low:

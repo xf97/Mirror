@@ -24,6 +24,7 @@ def normalization(_list, _highLimit, _lowLimit):
 	for index, value in enumerate(_list):
 		try:
 			resultList[index] = (((value - minValue) / (maxValue - minValue)) * _highLimit + ((value - maxValue) / (minValue - maxValue)) * _lowLimit)
+			resultList[index] -= 0.5
 		except ZeroDivisionError:
 			#对除0错误进行处理
 			resultList[index] = 1.0
