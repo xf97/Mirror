@@ -43,7 +43,7 @@ def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _handCountValue):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
 	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
-	_bias = _bias * _coolingValue * _handCountValue
+	_bias = _bias * _coolingValue #* _handCountValue
 	sigma = _loc * 0.2 / 6
 	sigma = sigma if sigma < SIGMA else SIGMA
 	meanValue = _loc + _bias * sigma * 0.5

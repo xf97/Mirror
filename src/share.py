@@ -66,7 +66,7 @@ class shareClass:
 		else:
 			if diff > 0.2:
 				diff = 0.2
-			coolingValue = (-1) * math.cos(self.period * diff)
+			coolingValue = math.cos(self.period * diff)
 			return coolingValue
 
 	def getUpperLimit(self):
@@ -203,7 +203,7 @@ class shareClass:
 		self.resetStopFlag()
 		self.setLowerAndUpperLimit()
 		#要调整单调天数
-		self.updateMonotonousDays()
+		#self.updateMonotonousDays()
 
 #单元测试
 if __name__ == "__main__":
