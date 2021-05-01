@@ -29,11 +29,11 @@ from dict2Excel import *
 
 #常量部分
 INIT_TRANS_DAYS = 20 #初始化天数 
-LAST_YEARS = 19	# 持续调查20年
-USERS_NUM = 100	#参与账户数量
-SHARES_NUM = 10	#参与的股票数量
-DAYS_IN_1_YEAR = 239	#一年平均有239天交易日
-DAYS_IN_1_MONTH = [19, 35, 57, 77, 95, 115, 137, 159, 179, 196, 217, 239] 	#每月最后一个交易日
+LAST_YEARS = 19	# 持续调查19年
+USERS_NUM = 500	#参与账户数量
+SHARES_NUM = 13	#参与的股票数量
+DAYS_IN_1_YEAR = 247	#一年平均有247天交易日
+DAYS_IN_1_MONTH = [20, 35, 58, 78, 98, 119, 142, 164, 185, 202, 224, 247] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
@@ -71,8 +71,8 @@ class mirror:
 			shareInfoDict[shareId] = list()
 			shareInfoDict[shareId].append(sharePrice)
 		#记录股票总数
-		for value in shareNumberSheet["value_row"].values():
-			if value:
+		for index, value in enumerate(shareNumberSheet["value_row"].values()):
+			if value and index < SHARES_NUM:
 				shareId = int(value["股票代码"])
 				shareNum = int(value["初始股数"])
 				if self.initFund == 0:
@@ -101,7 +101,7 @@ class mirror:
 
 	def initAccounts_1(self, _accountsNum, _initFund, _sharesList):
 		print("\r账户初始化...ing", end = "")
-		#初始化每个账户，包括现有资金、50只股票的持有情况、利息账户
+		#初始化每个账户，包括现有资金、13只股票的持有情况、利息账户
 		accountsList = list()
 		#要每只股票的总股数和价格
 		shareInfoList = [[0, 0]] * len(_sharesList)
