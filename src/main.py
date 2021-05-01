@@ -29,7 +29,7 @@ from dict2Excel import *
 
 #常量部分
 INIT_TRANS_DAYS = 20 #初始化天数 
-LAST_YEARS = 19	# 持续调查19年
+LAST_YEARS = 17	# 持续调查19年
 USERS_NUM = 500	#参与账户数量
 SHARES_NUM = 13	#参与的股票数量
 DAYS_IN_1_YEAR = 247	#一年平均有247天交易日
