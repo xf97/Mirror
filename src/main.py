@@ -31,7 +31,7 @@ from dict2Excel import *
 INIT_TRANS_DAYS = 20 #初始化天数 
 LAST_YEARS = 17	# 持续调查19年
 USERS_NUM = 500	#参与账户数量
-SHARES_NUM = 13	#参与的股票数量
+SHARES_NUM = 10	#参与的股票数量
 DAYS_IN_1_YEAR = 247	#一年平均有247天交易日
 DAYS_IN_1_MONTH = [20, 35, 58, 78, 98, 119, 142, 164, 185, 202, 224, 247] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
