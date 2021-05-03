@@ -126,6 +126,7 @@ def doTransaction(_accountsList, \
 	coolingValue = _sharesList[_shareIndex].getCoolingValue(price)
 	#减弱因为交易笔数多而产生的影响
 	handCountValue = getHandCountValue(_transactionRecord.getHandCount(_shareIndex))
+	#handCountValue = getHandCountValue(_transactionRecord.getYesterdayTransNum(_shareIndex))
 	'''
 	if _flag == 1:
 		print(coolingValue, "*****")

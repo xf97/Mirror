@@ -64,8 +64,8 @@ class shareClass:
 		if diff == 0:
 			return 1
 		else:
-			if diff > 0.2:
-				diff = 0.2
+			if diff > 0.1:
+				diff = 0.1
 			coolingValue = math.cos(self.period * diff)
 			return coolingValue
 

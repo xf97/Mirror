@@ -30,7 +30,7 @@ from dict2Excel import *
 #常量部分
 INIT_TRANS_DAYS = 20 #初始化天数 
 LAST_YEARS = 17	# 持续调查19年
-USERS_NUM = 500	#参与账户数量
+USERS_NUM = 250	#参与账户数量
 SHARES_NUM = 10	#参与的股票数量
 DAYS_IN_1_YEAR = 247	#一年平均有247天交易日
 DAYS_IN_1_MONTH = [20, 35, 58, 78, 98, 119, 142, 164, 185, 202, 224, 247] 	#每月最后一个交易日
@@ -224,11 +224,25 @@ class mirror:
 					normalizationVolume = [0.0] * len(self.sharesList)	#就在原值进行改动
 				else: 
 					relativeVolumeList = [0.0] * len(self.sharesList)
+					#更新aveShareNum，使用钱来投票
+					aveShareNum = 0.0
+					for index, share in enumerate(self.sharesList):
+						#获得昨日交易量
+						thisShareNum = self.transactionRecord.getYesterdayTransNum(index)
+						#获得昨日价格
+						prePrice = share.prePrice
+						#加上
+						aveShareNum += (thisShareNum * prePrice)
+					#计算平均
+					aveShareNum /= (len(self.sharesList))
+					#计算归一化
 					for index, share in enumerate(self.sharesList):
 						#获得该只股票昨日交易量
 						thisShareNum = self.transactionRecord.getYesterdayTransNum(index)
+						#获得昨日价格
+						prePrice = share.prePrice
 						#计算相对成交量
-						relativeVolumeList[index] = (thisShareNum) / aveShareNum
+						relativeVolumeList[index] = (thisShareNum * prePrice) / aveShareNum
 					#然后对相对成交量进行一个归一化处理
 					#不在原值上修改，要保留变量
 					#print(relativeVolumeList)
