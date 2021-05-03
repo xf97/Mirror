@@ -39,13 +39,17 @@ _user1是买方，_user2是卖方
 成交的数据要记录
 '''
 
-def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _handCountValue):
+def getNormalListBias(_low, _high, _loc, _bias, _coolingValue, _handCountValue, _thisYearPrice):
 	#_bias表示的是出价均值的偏移幅度，值在[0.9-1.1]之间
 	#_coolingValue用来抑制连续涨跌造成的价格变动过大
 	#该函数生成一个符合正态分布的，值在[_low, _high]之间的序列
-	_bias = _bias * _coolingValue * _handCountValue * _handCountValue * 0.5
+	_bias = _bias * _coolingValue * _handCountValue * 0.5
 	sigma = _loc * 0.2 / 6
 	sigma = sigma if sigma < SIGMA else SIGMA
+	if _loc > _thisYearPrice:
+		_bias = _bias if _bias < 0 else (-1) * _bias
+	else:
+		_bias = _bias if _bias > 0 else (-1) * _bias
 	meanValue = _loc + _bias * sigma
 	if meanValue > _high:
 		meanValue = _high
@@ -66,15 +70,15 @@ def getNormalList(_low, _high, _loc):
 	#添加涨跌值
 	return intervalList
 
-def getPrice(_low, _high, _price, _bias, _coolingValue, _handCountValue):
+def getPrice(_low, _high, _price, _bias, _coolingValue, _handCountValue, _thisYearPrice):
 	#该函数返回一个在[_low, _high]之间的浮点数，闭区间
 	#生成符合正态分布的数列
 	#要抑制偏移的幅度
-	buyPriceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, _handCountValue)
+	buyPriceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, _handCountValue, _thisYearPrice)
 	count = 0
 	while len(buyPriceList) == 0:
 		count += 1
-		buyPriceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, _handCountValue)
+		buyPriceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, _handCountValue, _thisYearPrice)
 		if count >= 10000:
 			while len(priceList) <= 100:
 				tempNum = random.uniform(_low, _high + LOSS_VALUE)
@@ -82,12 +86,12 @@ def getPrice(_low, _high, _price, _bias, _coolingValue, _handCountValue):
 					tempNum = _high
 				buyPriceList = numpy.append(buyPriceList, tempNum)
 	price1 = numpy.random.choice(buyPriceList)
-	sellPriceList = getNormalListBias(_low, _high, price1, _bias, _coolingValue, _handCountValue)
+	sellPriceList = getNormalListBias(_low, _high, price1, _bias, _coolingValue, _handCountValue, _thisYearPrice)
 	count = 0
 	while len(sellPriceList) == 0:
 		#print("\r计算正态分布中...", end = "")
 		count += 1
-		sellPriceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, _handCountValue)
+		sellPriceList = getNormalListBias(_low, _high, _price, _bias, _coolingValue, _handCountValue, _thisYearPrice)
 		if count >= 10000:
 			while len(priceList) <= 100:
 				tempNum = random.uniform(_low, _high + LOSS_VALUE)
@@ -126,6 +130,7 @@ def doTransaction(_accountsList, \
 	coolingValue = _sharesList[_shareIndex].getCoolingValue(price)
 	#减弱因为交易笔数多而产生的影响
 	handCountValue = getHandCountValue(_transactionRecord.getHandCount(_shareIndex))
+	thisYearPrice = _sharesList[_shareIndex].getNewYearPrice()
 	#handCountValue = getHandCountValue(_transactionRecord.getYesterdayTransNum(_shareIndex))
 	'''
 	if _flag == 1:
@@ -135,7 +140,7 @@ def doTransaction(_accountsList, \
 	#买方
 	#注意，uniform函数只包含下限，不包含上限
 	#要注意出价主要集中在中间，而不在两边—待完成——完成
-	user1Price, user2Price = getPrice(lowLimit, highLimit, price, _normalVolume[_shareIndex] , coolingValue, handCountValue)
+	user1Price, user2Price = getPrice(lowLimit, highLimit, price, _normalVolume[_shareIndex] , coolingValue, handCountValue, thisYearPrice)
 	#user2Price = getPrice(lowLimit, highLimit, price)
 	#只有买方出价大于等于卖方要价时，才交易
 	if user1Price >= user2Price:
