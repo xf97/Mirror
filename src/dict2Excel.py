@@ -12,7 +12,8 @@ import numpy
 from normalization import *
 
 #测试，先输出成json文件
-FILE_SUFFIX = ".xlsx"
+FILE_SUFFIX = "_year.xlsx"
+FILE_PREFIX = "..\\result\\"
 
 #_year表示当前年份
 #_infoDict表示该年份最后一天的收盘价值
@@ -20,8 +21,8 @@ def dict2Excel(_year, _infoDict, _shareNum, _colName):
 	colNameList = [str(i) for i in range(1, _shareNum + 1)]
 	colNameList.insert(0, _colName)
 	#print(colNameList)
-	wb = Workbook(str(_year) + FILE_SUFFIX)
-	ws = wb.add_worksheet("本年度各月份各支股票收盘价格")
+	wb = Workbook(FILE_PREFIX + str(_year) + FILE_SUFFIX)
+	ws = wb.add_worksheet("closingPriceOfStock")
 	_1stRow = 0
 	#写入列名
 	for header in colNameList:
@@ -36,7 +37,7 @@ def dict2Excel(_year, _infoDict, _shareNum, _colName):
 		ws.write_row(row, 1, value)
 		row += 1
 	wb.close()
-	print("%d年度数据已保存-%s" % (_year, str(_year) + FILE_SUFFIX))
+	print("%d year's data has been saved.-%s" % (_year, FILE_PREFIX + str(_year) + FILE_SUFFIX))
 
 #_year表示当前年份
 #_infoDict表示该年份最后一天的收盘价值
@@ -44,7 +45,7 @@ def dict2ExcelPriceRecord(_year, _month, _day, _infoDict, _shareNum, _colName):
 	colNameList = [str(i) for i in range(1, _shareNum + 1)]
 	colNameList.insert(0, _colName)
 	#print(colNameList)
-	wb = Workbook(str(_year) + "_" + str(_month) + "_" + str(_day) + FILE_SUFFIX)
+	wb = Workbook(FILE_PREFIX + str(_year) + "_" + str(_month) + "_" + str(_day) + FILE_SUFFIX)
 	ws = wb.add_worksheet("当日股票收盘价格")
 	_1stRow = 0
 	#写入列名
@@ -64,10 +65,10 @@ def dict2ExcelPriceRecord(_year, _month, _day, _infoDict, _shareNum, _colName):
 
 def dict2ExcelText(_year, _infoDict):
 	colNameList = [str(i) for i in range(1, 21)]
-	colNameList.insert(0, "月份/股票")
+	colNameList.insert(0, "Month/Price")
 	#print(colNameList)
 	wb = Workbook(str(_year) + FILE_SUFFIX)
-	ws = wb.add_worksheet("本年度各月份各支股票收盘价格")
+	ws = wb.add_worksheet("Closing price of each stock in each month of the year")
 	_1stRow = 0
 	#写入列名
 	for header in colNameList:
@@ -82,7 +83,7 @@ def dict2ExcelText(_year, _infoDict):
 		ws.write_row(row, 1, value)
 		row += 1
 	wb.close()
-	print("%d年度数据已保存-%s" % (_year, str(_year) + FILE_SUFFIX))
+	print("%d year's data has been saved.-%s" % (_year, str(_year) + FILE_SUFFIX))
 
 #单元测试
 if __name__ == "__main__":

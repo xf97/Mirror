@@ -37,7 +37,7 @@ class shareClass:
 
 	#打印对象使用
 	def __str__(self):
-		msg = "股票ID " + str(self.shareId) + "\n"
+		msg = "Stock Id " + str(self.shareId) + "\n"
 		msg += ("当天涨跌上下限 " + str(self.priceUpperLimit) + " " + str(self.priceLowerLimit) + "\n")
 		msg += ("当天出价上下限 " + str(self.bidHighLimit) + " " + str(self.bidLowLimit) + "\n")
 		msg += ("价格 " + str(self.price) + "\n")

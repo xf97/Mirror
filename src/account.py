@@ -26,12 +26,12 @@ class accountClass:
 
 	def __str__(self):
 		msg = str()
-		msg += ("当前账户编号： " + str(self.accountId) + "\n")
-		msg += ("当前资金： %.2f\n" % (self.fund))
-		msg += ("股票持有情况： \n")
+		msg += ("Account Id: " + str(self.accountId) + "\n")
+		msg += ("Hold Cash: %.2f\n" % (self.fund))
+		msg += ("Hold Stock: \n")
 		for index, i in enumerate(self.stockHolding):
 			if i != 0:
-				msg += ("第" + str(index + 1) + "只： " + str(i) + "\n")
+				msg += ("#" + str(index + 1) + ": " + str(i) + "\n")
 			else:
 				continue
 		return msg

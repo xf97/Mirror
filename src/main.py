@@ -28,13 +28,15 @@ from excel2Dict import ExcelToDict
 from dict2Excel import *
 
 #常量部分
+'''
 INIT_TRANS_DAYS = 20 #初始化天数 
-LAST_YEARS = 17	# 持续调查19年
+LAST_YEARS = 17	# 持续调查17年
 USERS_NUM = 50	#参与账户数量
 SHARES_NUM = 10	#参与的股票数量
 DAYS_IN_1_YEAR = 247	#一年平均有247天交易日
 DAYS_IN_1_MONTH = [20, 35, 58, 78, 98, 119, 142, 164, 185, 202, 224, 247] 	#每月最后一个交易日
 SALE_PROBABILITY = 0.5	#想出售的概率
+'''
 #需要读取的数据文件们, 例如股票的信息, 年报的信息
 
 class mirror:
@@ -52,8 +54,9 @@ class mirror:
 		#初始化日志记录
 		#todo
 
+
 	def initShares(self, _sharesNum):
-		print("\r股票初始化...ing", end = "")
+		print("\rStock...ing", end = "")
 		#初始化每只股票，包括价格、价格上下限、总股数、想买的概率(20年的，以数组形式)、当日是否允许再交易(涨跌停)
 		#价格，id，总数和股票数量
 		shareInfo = ExcelToDict(DATA_PATH)
@@ -66,17 +69,17 @@ class mirror:
 		#股票信息字典，键-id，值-列表，依次是初始价格、股票总数、想买概率列表
 		shareInfoDict = dict()
 		for value in initPriceSheet["value_row"].values():
-			shareId = value["股票代码"]
-			sharePrice = value["初始价格"]
+			shareId = value["StockId"]
+			sharePrice = value["Price"]
 			shareInfoDict[shareId] = list()
 			shareInfoDict[shareId].append(sharePrice)
 		#记录股票总数
 		for index, value in enumerate(shareNumberSheet["value_row"].values()):
 			if value and index < SHARES_NUM:
-				shareId = int(value["股票代码"])
-				shareNum = int(value["初始股数"])
+				shareId = int(value["StockId"])
+				shareNum = int(value["NumberOfShares"])
 				if self.initFund == 0:
-					self.initFund = int(value["初始资金"])
+					self.initFund = int(value["Cash"])
 				shareInfoDict[shareId].append(shareNum)
 		#初始化交易概率
 		for valueDict in purchaseProbSheet["value_row"].values():
@@ -86,6 +89,7 @@ class mirror:
 		#现在初始化股票
 		sharesList = list()
 		for key, value in shareInfoDict.items():
+			#print(value)
 			if value != [None]:
 				shareId = key
 				sharePrice = value[0]
@@ -96,11 +100,11 @@ class mirror:
 		for obj in sharesList:
 			print(obj)
 		'''
-		print("\r股票初始化...Done")
+		print("\rStock...Done")
 		return sharesList
 
 	def initAccounts_1(self, _accountsNum, _initFund, _sharesList):
-		print("\r账户初始化...ing", end = "")
+		print("\rAccount...ing", end = "")
 		#初始化每个账户，包括现有资金、13只股票的持有情况、利息账户
 		accountsList = list()
 		#要每只股票的总股数和价格
@@ -178,7 +182,7 @@ class mirror:
 						continue
 			process = int(nowDay / _days * 100)
 			#print(process)
-			print("\r账户初始化进度：" + str(process) +"%", end = "")
+			print("\rAccount:" + str(process) +"%", end = "")
 			nowDay += 1
 			#更新交易记录
 			self.transactionRecord.newDayComes()
@@ -299,7 +303,9 @@ class mirror:
 				for share in self.sharesList:
 					share.dailyInit()
 				for index, share in enumerate(self.sharesList):
-					print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子%.2f,当前偏移值%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue(share.price), normalizationVolume[index]))
+					#print("第%d只股票，前天收盘价-%.2f,今天收盘价-%.2f,共交易%d笔,当前冷却因子%.2f,当前偏移值%.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue(share.price), normalizationVolume[index]))
+					#print("%d# Stock，yesterday price-%.2f, today price-%.2f, total transaction %d, current cold value %.2f, current bias value %.2f" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index), share.getCoolingValue(share.price), normalizationVolume[index]))
+					print("%d# Stock，yesterday price-%.2f, today price-%.2f, total transaction %d" % (share.getShareId(), share.prePrice, share.price, self.transactionRecord.getHandCount(index)))
 				#记录当天收盘价
 				for share in self.sharesList:
 					share.setPrePrice()
@@ -315,7 +321,7 @@ class mirror:
 				'''
 				#更新交易记录
 				self.transactionRecord.newDayComes()
-				print("*" * 20, str(nowYear) + "年 ", str(nowMonth) + "月 ", str(nowDay), "天", "*" * 20)
+				print("*" * 20, str(nowYear) + " Year ", str(nowMonth) + " Month ", str(nowDay), " Day ", "*" * 20)
 				if nowDay == DAYS_IN_1_MONTH[nowMonth - 1]:
 					#达到当月最后一天
 					#记录数据
@@ -324,7 +330,7 @@ class mirror:
 				nowDay += 1
 			#一年结束
 			#记录本年数据
-			dict2Excel(nowYear, infoDict, SHARES_NUM, "月份/股票")
+			dict2Excel(nowYear, infoDict, SHARES_NUM, "Month/Stock")
 			nowYear += 1
 			nowDay = 1
 			nowMonth = 1
