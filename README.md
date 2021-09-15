@@ -1,7 +1,7 @@
 # Mirror(镜像)
 ![logo](logo.jpg)
 
-*Mirror* is the program used in our paper **An identification mechanism of stock price bubble: evidence from Chinese stock market**, which is mainly used to simulates stock automatic trading.
+*Mirror* is the program used in our paper **"An identification mechanism of stock price bubble: evidence from Chinese stock market"**, which is mainly used to simulates stock automatic trading.
 
 
 
