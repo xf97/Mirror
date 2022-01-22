@@ -7,7 +7,7 @@
 
 ## How to use *Mirror*
 
-To drive mirror, you need to provide the following groups of data:
+To drive mirror, you need to provide the following several groups of data:
 
 1. Initial stock price (by modifying *data/datarequiredformirror.xlsx/initPrice.sheet*)
 2. The probability of users purchasing each stock each year (by modifying *data/DataRequiredForMirror.xlsx/purchaseProb.sheet*, please refer to our paper for the calculation method of purchase probability)
